@@ -77,7 +77,7 @@ function initCrossfilter() {
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart  
   poiChart
-    .width(380)
+    .width(780)
     .height(200)    
     .margins({top: 10, right: 20, bottom: 30, left: 40})  
     .mouseZoomable(true) 
@@ -95,7 +95,10 @@ function initCrossfilter() {
     // .xUnits(dc.units.fp.precision(depthBinWidth))
     // .round(function(d) {return depthBinWidth*Math.floor(d/depthBinWidth)})    
     .renderHorizontalGridLines(true)
-    .xAxis().tickFormat();
+    .xAxis().tickFormat();    
+    //.xAxis().tickFormat(d3.time.format("%b %y"));
+
+    //time format: https://github.com/mbostock/d3/wiki/Time-Formatting
 
   // xAxis_poiChart = poiChart.xAxis();
   // xAxis_poiChart.ticks(6).tickFormat(d3.format("d"));
