@@ -1,0 +1,11 @@
+/home/estimr2/nhempelmann/data/NCEP/*.dat
+
+the name stands for:
+
+slpano-NA_ref_1955-1984.analog30corrnk.1d.all1948.dat
+
+slpano-NA : {sea level pressure North Atlanic}
+1955-1984: {period where analogs are picked}
+corrnk : {corrnk vs rms is the detection methode}
+
+all1948 : {period to look at}
