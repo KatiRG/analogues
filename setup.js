@@ -19,12 +19,16 @@ function init() {
 //d3.tsv("proxies_select.tsv", function(data) {
 d3.tsv("analogues_bidon.tsv", function(data) {
   var dateFormat = d3.time.format('%Y%m%d');  
+  
 
   data.forEach(function(d) {
-    d.dateRef = dateFormat.parse(d.dateRef);    
+    
+    d.dateRef = dateFormat.parse(d.dateRef);
+    d.adate = +d.adate; //dateFormat.parse(d.adate);
     d.dateAnlg = +d.dateAnlg;
     d.Cor = +d.Cor;
-    d.Dis = +d.Dis;    
+    d.Dis = +d.Dis;
+    //console.log("d.adate: ", d.adate)     
   });
   points=data;
 
@@ -59,7 +63,6 @@ function initCrossfilter() {
 
   //-----------------------------------
   archiveDimension = filter.dimension( function(d) { 
-    
     return d.dateAnlg; });
   archiveGrouping = archiveDimension.group();
 
@@ -68,11 +71,22 @@ function initCrossfilter() {
     return d3.time.hour(d.dateRef);
   });
   poiGrouping = poiDimension.group()
-    .reduceCount(function(d) { return d.dateRef; });;
+    .reduceCount(function(d) { return d.dateRef; });
+
+  //-----------------------------------  
+  decadeDimension = filter.dimension(function(d) {
+    console.log(d.adate)
+    if (d.adate >= 1950 && d.adate <= 1960) return "decade1950-60";
+    else if (d.adate > 1960 && d.adate <= 1970) return "decade1961-70";
+    else if (d.adate > 1970 && d.adate <= 1980) return "decade1971-80";
+    else return "decadexxx";
+  });
+  decadeGrouping = decadeDimension.group();
   
   //-----------------------------------
   poiChart  = dc.barChart("#chart-poi");  
   archiveChart  = dc.rowChart("#chart-archive");  
+  decadeChart  = dc.rowChart("#chart-decade");  
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart  
@@ -110,15 +124,6 @@ function initCrossfilter() {
 
 
   //-----------------------------------
-  // Ice_color = "#d6dbe0";
-  // Lake_color = "#6d87a8";
-  // Ocean_color = "#008cb2";
-  // Speleothem_color = "#afa393";
-  // Tree_color = "#568e14";
-  // var archiveColors = d3.scale.ordinal()
-  //  	.range([Ice_color, Lake_color, Ocean_color, Speleothem_color, Tree_color]);
-  
-
   archiveChart
     .width(180)
     .height(200)
@@ -129,6 +134,17 @@ function initCrossfilter() {
     .elasticX(true)
     .gap(2)
     .xAxis().ticks(4);
+
+   //-----------------------------------
+  decadeChart
+    .width(180)
+    .height(200)
+    .margins({top: 10, right: 10, bottom: 30, left: 10})  
+    .dimension(decadeDimension)
+    .group(decadeGrouping)    
+    .elasticX(true)
+    .gap(2)
+    .xAxis().ticks(4);  
 
  
 
