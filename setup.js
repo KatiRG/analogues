@@ -7,8 +7,9 @@ var poiGrouping;
 var archiveDimension;
 var archiveGrouping;
 
-
-
+//http://www.colourlovers.com/palette/3860796/Melting_Glaciers
+var decadeColors = d3.scale.ordinal()
+    .range(["#67739F", "#67739F", "#67739F", "#B1CEF5", "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
 
 // var idDimension;
 // var idGrouping;
@@ -16,8 +17,8 @@ var archiveGrouping;
 //====================================================================
 function init() {
 
-d3.tsv("analogues_reformat.tsv", function(data) {
-//d3.tsv("analogues_select.tsv", function(data) {
+//d3.tsv("analogues_reformat.tsv", function(data) {
+d3.tsv("analogues_select.tsv", function(data) {
 //d3.tsv("analogues_bidon.tsv", function(data) {
   var dateFormat = d3.time.format('%Y%m%d');  
 
@@ -87,7 +88,7 @@ function initCrossfilter() {
 
   //-----------------------------------
   poiChart  = dc.barChart("#chart-poi");  
-  archiveChart  = dc.rowChart("#chart-archive");  
+  //archiveChart  = dc.rowChart("#chart-archive");  
   decadeChart  = dc.rowChart("#chart-decade");  
 
   //-----------------------------------
@@ -100,47 +101,33 @@ function initCrossfilter() {
     //.brushOn(false)
     .dimension(poiDimension)
     .group(poiGrouping)
-    .transitionDuration(500)    
+    .transitionDuration(500)
     .centerBar(true)
-    .gap(0.5)
+    //.filter([1980, 2015])
+    .gap(10)
     .x(d3.time.scale().domain(d3.extent(points, function(d) { return d.dateRef; })))    
     .elasticY(true) 
-    .elasticX(false)   
-    //.on("preRedraw",update0)
-    //.y(d3.scale.linear().domain([0, 10]))
-    // .xUnits(dc.units.fp.precision(depthBinWidth))
-    // .round(function(d) {return depthBinWidth*Math.floor(d/depthBinWidth)})    
+    .elasticX(false)       
     .renderHorizontalGridLines(true)
-    .xAxis().tickFormat();    
-    //.xAxis().tickFormat(d3.time.format("%b %y"));
-
-    //time format: https://github.com/mbostock/d3/wiki/Time-Formatting
-
-  // xAxis_poiChart = poiChart.xAxis();
-  // xAxis_poiChart.ticks(6).tickFormat(d3.format("d"));
-  // yAxis_poiChart = poiChart.yAxis();
-  // yAxis_poiChart.tickFormat(d3.format("d")).tickSubdivide(0);
+    .xAxis().tickFormat();   
 
   //-----------------------------------
   
 
 
   //-----------------------------------
-  archiveChart
-    .width(180)
-    .height(800)
-    .margins({top: 10, right: 10, bottom: 30, left: 10})	
-    .dimension(archiveDimension)
-    .group(archiveGrouping)
-    //.renderLabel(false)
-    .label(function (p) {
-      //console.log("p: ", p.key.getFullYear())
-      return p.key.getFullYear();
-    })
-    //.colors(archiveColors)
-    .elasticX(true)
-    .gap(2)
-    .xAxis().ticks(4);
+  // archiveChart
+  //   .width(180)
+  //   .height(800)
+  //   .margins({top: 10, right: 10, bottom: 30, left: 10})	
+  //   .dimension(archiveDimension)
+  //   .group(archiveGrouping)
+  //   .renderLabel(false)
+  //   //.label(function (p) { return p.key.getFullYear(); })
+  //   //.colors(archiveColors)
+  //   .elasticX(true)
+  //   .gap(2)
+  //   .xAxis().ticks(4);
 
    //-----------------------------------
   decadeChart
@@ -152,6 +139,8 @@ function initCrossfilter() {
     .title(function (p) {      
       return p.key +": "+ p.value +" analogues";
     })
+    //.colors(decadeColours)
+    .colors(decadeColors)
     .elasticX(true)
     .gap(2)
     .xAxis().ticks(4);  
