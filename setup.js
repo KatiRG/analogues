@@ -16,19 +16,17 @@ var archiveGrouping;
 //====================================================================
 function init() {
 
-//d3.tsv("proxies_select.tsv", function(data) {
-d3.tsv("analogues_bidon.tsv", function(data) {
+d3.tsv("analogues_reformat.tsv", function(data) {
+//d3.tsv("analogues_select.tsv", function(data) {
+//d3.tsv("analogues_bidon.tsv", function(data) {
   var dateFormat = d3.time.format('%Y%m%d');  
-  
 
-  data.forEach(function(d) {
-    
-    d.dateRef = dateFormat.parse(d.dateRef);
-    d.adate = +d.adate; //dateFormat.parse(d.adate);
-    d.dateAnlg = +d.dateAnlg;
-    d.Cor = +d.Cor;
-    d.Dis = +d.Dis;
-    //console.log("d.adate: ", d.adate)     
+  data.forEach(function(d) {    
+    d.dateRef = dateFormat.parse(d.dateRef);    
+    d.dateAnlg = dateFormat.parse(d.dateAnlg);
+    // d.Cor = +d.Cor;
+    // d.Dis = +d.Dis;
+    //console.log("d.dateAnlg: ", d.dateAnlg.getFullYear())     
   });
   points=data;
 
@@ -74,15 +72,19 @@ function initCrossfilter() {
     .reduceCount(function(d) { return d.dateRef; });
 
   //-----------------------------------  
-  decadeDimension = filter.dimension(function(d) {
-    console.log(d.adate)
-    if (d.adate >= 1950 && d.adate <= 1960) return "decade1950-60";
-    else if (d.adate > 1960 && d.adate <= 1970) return "decade1961-70";
-    else if (d.adate > 1970 && d.adate <= 1980) return "decade1971-80";
-    else return "decadexxx";
+  decadeDimension = filter.dimension(function(d) {    
+    year = d.dateAnlg.getFullYear();    
+
+    if (year > 1950 && year <= 1960) { return "1951-1960"; }
+    else if (year > 1960 && year <= 1970)  { return "1961-1970"; }
+    else if (year > 1970 && year <= 1980) return "1971-1980";
+    else if (year > 1980 && year <= 1990) { return "1981-1990"; }
+    else if (year > 1990 && year <= 2000) return "1991-2000";
+    else if (year > 2000 && year <= 2010) return "2001-2010";
+    else if (year > 2010 && year <= 2020) return "2011-2016";    
   });
   decadeGrouping = decadeDimension.group();
-  
+
   //-----------------------------------
   poiChart  = dc.barChart("#chart-poi");  
   archiveChart  = dc.rowChart("#chart-archive");  
@@ -126,10 +128,15 @@ function initCrossfilter() {
   //-----------------------------------
   archiveChart
     .width(180)
-    .height(200)
+    .height(800)
     .margins({top: 10, right: 10, bottom: 30, left: 10})	
     .dimension(archiveDimension)
     .group(archiveGrouping)
+    //.renderLabel(false)
+    .label(function (p) {
+      //console.log("p: ", p.key.getFullYear())
+      return p.key.getFullYear();
+    })
     //.colors(archiveColors)
     .elasticX(true)
     .gap(2)
@@ -141,7 +148,10 @@ function initCrossfilter() {
     .height(200)
     .margins({top: 10, right: 10, bottom: 30, left: 10})  
     .dimension(decadeDimension)
-    .group(decadeGrouping)    
+    .group(decadeGrouping)
+    .title(function (p) {      
+      return p.key +": "+ p.value +" analogues";
+    })
     .elasticX(true)
     .gap(2)
     .xAxis().ticks(4);  
