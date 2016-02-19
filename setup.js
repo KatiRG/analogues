@@ -17,8 +17,8 @@ var decadeColors = d3.scale.ordinal()
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat.tsv", function(data) {
-d3.tsv("analogues_select.tsv", function(data) {
+d3.tsv("analogues_reformat.tsv", function(data) {
+//d3.tsv("analogues_select.tsv", function(data) {
 //d3.tsv("analogues_bidon.tsv", function(data) {
   var dateFormat = d3.time.format('%Y%m%d');  
 
@@ -67,7 +67,7 @@ function initCrossfilter() {
 
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
-    return d3.time.hour(d.dateRef);
+    return d3.time.day(d.dateRef);
   });
   poiGrouping = poiDimension.group()
     .reduceCount(function(d) { return d.dateRef; });
