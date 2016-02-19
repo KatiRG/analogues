@@ -17,9 +17,9 @@ var decadeColors = d3.scale.ordinal()
 //====================================================================
 function init() {
 
+//d3.tsv("analogues_control.tsv", function(data) {
 d3.tsv("analogues_reformat.tsv", function(data) {
 //d3.tsv("analogues_select.tsv", function(data) {
-//d3.tsv("analogues_bidon.tsv", function(data) {
   var dateFormat = d3.time.format('%Y%m%d');  
 
   data.forEach(function(d) {    
@@ -76,13 +76,14 @@ function initCrossfilter() {
   decadeDimension = filter.dimension(function(d) {    
     year = d.dateAnlg.getFullYear();    
 
-    if (year > 1950 && year <= 1960) { return "1951-1960"; }
-    else if (year > 1960 && year <= 1970)  { return "1961-1970"; }
-    else if (year > 1970 && year <= 1980) return "1971-1980";
-    else if (year > 1980 && year <= 1990) { return "1981-1990"; }
-    else if (year > 1990 && year <= 2000) return "1991-2000";
-    else if (year > 2000 && year <= 2010) return "2001-2010";
-    else if (year > 2010 && year <= 2020) return "2011-2016";    
+         if (year >= 1950 && year <= 1959) return "1950-1959"; 
+    else if (year >= 1960 && year <= 1969) return "1960-1969"; 
+    else if (year >= 1970 && year <= 1979) return "1970-1979";
+    else if (year >= 1980 && year <= 1989) return "1980-1989"; 
+    else if (year >= 1990 && year <= 1999) return "1990-1999";
+    else if (year >= 2000 && year <= 2009) return "2000-2009";
+    else if (year >= 2010 && year <= 2019) return "2010-2019";    
+    else return "other";
   });
   decadeGrouping = decadeDimension.group();
 
@@ -103,7 +104,8 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)
-    //.filter([1980, 2015])
+    //.filter([19800101, 20150101])
+    .filter(dc.filters.RangedFilter(new Date(19800101), new Date(20150101)))
     .gap(10)
     .x(d3.time.scale().domain(d3.extent(points, function(d) { return d.dateRef; })))    
     .elasticY(true) 
@@ -131,7 +133,7 @@ function initCrossfilter() {
 
    //-----------------------------------
   decadeChart
-    .width(180)
+    .width(380)
     .height(200)
     .margins({top: 10, right: 10, bottom: 30, left: 10})  
     .dimension(decadeDimension)
