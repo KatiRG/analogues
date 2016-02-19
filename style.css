@@ -1,0 +1,109 @@
+/* mostly derived from crossfilter's default example */
+
+#charts {
+  padding: 0 0;
+}
+
+.chart {
+  display: inline-block;
+  margin: 0 20px 20px;
+
+}
+
+.reset {
+  padding-left: 1em;
+  font-size: smaller;
+  color: #555;
+}
+
+.background.bar {
+  fill: #ccc;
+}
+
+.dc-chart g.row text {
+  fill: #333;
+}
+
+#chart-depth .foreground.bar {
+  fill: #2EA3DB;
+}
+
+#chart-age .foreground.bar {
+  fill: #F5B441;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #333;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+  fill: #333;
+}
+
+#chart-depth .brush rect.extent {
+  fill: #2EA3DB;
+  fill-opacity: .25;
+}
+
+#chart-age .brush rect.extent {
+  fill: #F5B441;
+  fill-opacity: .25;
+}
+
+.brush .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+#map-div {
+  height: 512px;
+}
+
+#proxiesListTitle {
+  font-weight: normal;
+  background: #ddd;
+  font-style: italic;
+  padding-right: 30px;
+  color: #333;
+  white-space: nowrap;
+}
+
+.dc-chart-title {
+  color: #333;
+  font-weight: normal;
+  font-style: italic;
+}
+
+.filter {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  text-align: left;
+}
+
+.proxyItem {
+  line-height: 1.2em;
+  background: #eee;
+  margin-bottom: 1px;
+  color: #333;
+}
+
+.proxyItem div {
+  display: inline-block;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.imghelp {
+  border-radius: 10px;
+} 
+
+.symbol {
+  opacity: 0.8;
+}
