@@ -20,14 +20,14 @@ function init() {
 //d3.tsv("analogues_control.tsv", function(data) {
 d3.tsv("analogues_reformat.tsv", function(data) {
 //d3.tsv("analogues_select.tsv", function(data) {
-  var dateFormat = d3.time.format('%Y%m%d');  
+  var dateFormat = d3.time.format('%Y%m%d');
 
   data.forEach(function(d) {    
-    d.dateRef = dateFormat.parse(d.dateRef);    
+    d.dateRef = dateFormat.parse(d.dateRef);
     d.dateAnlg = dateFormat.parse(d.dateAnlg);
     // d.Cor = +d.Cor;
     // d.Dis = +d.Dis;
-    //console.log("d.dateAnlg: ", d.dateAnlg.getFullYear())     
+    //console.log("d.dateAnlg: ", d.dateAnlg.getFullYear())
   });
   points=data;
 
@@ -76,13 +76,14 @@ function initCrossfilter() {
   decadeDimension = filter.dimension(function(d) {    
     year = d.dateAnlg.getFullYear();    
 
-         if (year >= 1950 && year <= 1959) return "1950-1959"; 
-    else if (year >= 1960 && year <= 1969) return "1960-1969"; 
+         if (year >= 1940 && year <= 1949) return "1940-1949";
+    else if (year >= 1950 && year <= 1959) return "1950-1959";     
+    else if (year >= 1960 && year <= 1969) return "1960-1969";
     else if (year >= 1970 && year <= 1979) return "1970-1979";
-    else if (year >= 1980 && year <= 1989) return "1980-1989"; 
+    else if (year >= 1980 && year <= 1989) return "1980-1989";
     else if (year >= 1990 && year <= 1999) return "1990-1999";
     else if (year >= 2000 && year <= 2009) return "2000-2009";
-    else if (year >= 2010 && year <= 2019) return "2010-2019";    
+    else if (year >= 2010 && year <= 2019) return "2010-2019";
     else return "other";
   });
   decadeGrouping = decadeDimension.group();
@@ -93,7 +94,8 @@ function initCrossfilter() {
   decadeChart  = dc.rowChart("#chart-decade");  
 
   //-----------------------------------
-  //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart  
+  //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
+  dateFormat = d3.time.format('%Y%m%d');
   poiChart
     .width(780)
     .height(200)    
@@ -105,7 +107,8 @@ function initCrossfilter() {
     .transitionDuration(500)
     .centerBar(true)
     //.filter([19800101, 20150101])
-    .filter(dc.filters.RangedFilter(new Date(19800101), new Date(20150101)))
+    //.filter(dc.filters.RangedFilter(new Date(19800101), new Date(20150101)))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
     .gap(10)
     .x(d3.time.scale().domain(d3.extent(points, function(d) { return d.dateRef; })))    
     .elasticY(true) 
