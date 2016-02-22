@@ -34,9 +34,9 @@ d3.tsv("analogues_reformat.json", function(data) {
     else if (yr >= 2000 && yr <= 2009) d.dateAnlg = "2000-2009";
     else if (yr >= 2010 && yr <= 2019) d.dateAnlg = "2010-2019";
     // other ?
-
+    
     d.dateRef = dateFormat.parse(d.dateRef);
-    //d.dateAnlg = dateFormat.parse(d.dateAnlg);    
+    d.month = d3.time.month(d.dateRef); 
     
   });  
   points=data;
@@ -64,10 +64,13 @@ function initCrossfilter() {
  
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
-    return d.dateRef;    
+    //return d.dateRef;
+    return d.month;   
   });
-  poiGrouping = poiDimension.group()
-    .reduceCount(function(d) { return d.dateRef; });
+  //poiGrouping = poiDimension.group();
+  poiGrouping = poiDimension.group(function(d) {
+    return d3.time.month(d);
+  });
 
   //-----------------------------------  
   decadeDimension = filter.dimension(function(d) {    
@@ -93,7 +96,7 @@ function initCrossfilter() {
     .transitionDuration(500)
     .centerBar(true)    
     .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    .gap(10)
+    .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) { return d.dateRef; })))
     //.x(d3.scale.linear().domain([19400101, 20150000]))
     .elasticY(true) 
