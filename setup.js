@@ -4,82 +4,49 @@
 var filter;
 var poiDimension;
 var poiGrouping;
-var archiveDimension;
-var archiveGrouping;
+var decadeDimension;
+var decadeGrouping;
+
 
 var dateFormat = d3.time.format('%Y%m%d');
-var decade = [];
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
-    .range(["#67739F", "#67739F", "#67739F", "#B1CEF5", "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
-
-// var idDimension;
-// var idGrouping;
+    .range(["#67739F", "#67739F", "#67739F", "#67739F", "#B1CEF5", 
+            "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
 
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_control.tsv", function(data) {
 d3.tsv("analogues_reformat.json", function(data) {
-//d3.tsv("analogues_select.json", function(data) {
-  
-  data.forEach(function (d) {      
+//d3.tsv("analogues_select.json", function(data) {  
+    
+  data.forEach(function (d, idx) {      
 
     yr = parseInt(d.dateAnlg.substring(0, 4));
 
-    if (yr >= 1948 && yr <= 1949) {
-      decade.push({ anlgDecade: "1948-1949" });
-    }
-    else if (yr >= 1950 && yr <= 1959) {
-      decade.push({ anlgDecade: "1950-1959" });
-    }
-    else if (yr >= 1960 && yr <= 1969) {
-      decade.push({ anlgDecade: "1960-1969" });
-    }
-    else if (yr >= 1970 && yr <= 1979) {
-      decade.push({ anlgDecade: "1970-1979" });
-    }
-    else if (yr >= 1980 && yr <= 1989) {
-      decade.push({ anlgDecade: "1980-1989" });
-    }
-    else if (yr >= 1990 && yr <= 1999) {
-      decade.push({ anlgDecade: "1990-1999" });
-    }
-    else if (yr >= 2000 && yr <= 2009) {
-      decade.push({ anlgDecade: "2000-2009" });
-    }
-    else if (yr >= 2010 && yr <= 2019) {
-      decade.push({ anlgDecade: "2010-2019" });
-    }
-
-
+    if (yr >= 1940 && yr <= 1949) d.dateAnlg = "1940-1949";
+    else if (yr >= 1950 && yr <= 1959) d.dateAnlg = "1950-1959";
+    else if (yr >= 1960 && yr <= 1969) d.dateAnlg = "1960-1969";
+    else if (yr >= 1970 && yr <= 1979) d.dateAnlg = "1970-1979";    
+    else if (yr >= 1980 && yr <= 1989) d.dateAnlg = "1980-1989";    
+    else if (yr >= 1990 && yr <= 1999) d.dateAnlg = "1990-1999";
+    else if (yr >= 2000 && yr <= 2009) d.dateAnlg = "2000-2009";
+    else if (yr >= 2010 && yr <= 2019) d.dateAnlg = "2010-2019";
     // other ?
 
-    
-
-    //d.dateRef = d.dateRef;
     d.dateRef = dateFormat.parse(d.dateRef);
     //d.dateAnlg = dateFormat.parse(d.dateAnlg);    
     
-  });
+  });  
   points=data;
 
-
-
-
-
-  //initMap();
   initCrossfilter();
 
 
-// dimension and group for looking up currently selected markers
-  // idDimension = filter.dimension(function(d, i) { return i; });
-  // idGrouping = idDimension.group(function(id) { return id; });
-
   // Render the total.
   d3.selectAll("#total")
-            .text(filter.size());
+    .text(filter.size());
 
   //initList();
 
@@ -94,39 +61,22 @@ function initCrossfilter() {
 
   //-----------------------------------
   filter = crossfilter(points);
-
-  //-----------------------------------
-  // archiveDimension = filter.dimension( function(d) { 
-  //   return d.dateAnlg; 
-  //   //return dateFormat.parse(d.dateAnlg);
-  // });
-  // archiveGrouping = archiveDimension.group();
-
+ 
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
-    return d.dateRef;
-    //return d3.time.day(d.dateRef);
+    return d.dateRef;    
   });
   poiGrouping = poiDimension.group()
     .reduceCount(function(d) { return d.dateRef; });
 
-  //-----------------------------------    
-  // decadeDimension = filter.dimension(function(d) {
-  //   //return d.dateAnlg;
-  //   return decade;
-  // });
-  // decadeGrouping = decadeDimension.group();
-
-  //TEST
-  testfilter = crossfilter(decade);
-  testDimension = testfilter.dimension(function(d) {    
-    return d.anlgDecade;
+  //-----------------------------------  
+  decadeDimension = filter.dimension(function(d) {    
+    return d.dateAnlg;
   });
-  testGrouping = testDimension.group();
+  decadeGrouping = decadeDimension.group();
 
   //-----------------------------------
-  poiChart  = dc.barChart("#chart-poi");
-  //archiveChart  = dc.rowChart("#chart-archive");
+  poiChart  = dc.barChart("#chart-poi");  
   decadeChart  = dc.rowChart("#chart-decade");  
 
   //-----------------------------------
@@ -157,14 +107,12 @@ function initCrossfilter() {
     .width(380)
     .height(200)
     .margins({top: 10, right: 10, bottom: 30, left: 10})  
-    // .dimension(decadeDimension)
-    // .group(decadeGrouping)
-    .dimension(testDimension)
-    .group(testGrouping)    
+    .dimension(decadeDimension)
+    .group(decadeGrouping)    
     // .title(function (p) {      
     //   return p.key +": "+ p.value +" analogues";
     // })    
-    //.colors(decadeColours)
+    .colors(decadeColours)
     .elasticX(true)
     .gap(2)
     .xAxis().ticks(4);  
@@ -326,5 +274,4 @@ function updateList() {
 	 $("#"+(i+1)).hide();
   }
 }
-
 //====================================================================
