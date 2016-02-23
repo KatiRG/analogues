@@ -18,8 +18,8 @@ var decadeColours = d3.scale.ordinal()
 //====================================================================
 function init() {
 
-d3.tsv("analogues_reformat.json", function(data) {
-//d3.tsv("analogues_select.json", function(data) {  
+//d3.tsv("analogues_reformat.json", function(data) {
+d3.tsv("analogues_select.json", function(data) {  
     
   data.forEach(function (d, idx) {      
 
@@ -36,7 +36,7 @@ d3.tsv("analogues_reformat.json", function(data) {
     // other ?
     
     d.dateRef = dateFormat.parse(d.dateRef);
-    d.month = d3.time.month(d.dateRef); 
+    //d.month = d3.time.month(d.dateRef); 
     
   });  
   points=data;
@@ -64,10 +64,10 @@ function initCrossfilter() {
  
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
-    //return d.dateRef;
-    return d.month;   
+    return d.dateRef;
+    //return d.month;   
   });
-  //poiGrouping = poiDimension.group();
+  poiDayGrouping = poiDimension.group();
   poiGrouping = poiDimension.group(function(d) {
     return d3.time.month(d);
   });
@@ -84,24 +84,93 @@ function initCrossfilter() {
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
-  dateFormat = d3.time.format('%Y%m%d');
+  var currentGranularity = 'month';
+  var saveLevel = 0;
+  var init_domain0 = dateFormat.parse("21000101"), init_domain1 = dateFormat.parse("2100101");
   poiChart
     .width(780)
     .height(200)    
     .margins({top: 10, right: 20, bottom: 30, left: 40})  
     .mouseZoomable(true) 
-    //.brushOn(false)
+    //.brushOn(false)    
     .dimension(poiDimension)
     .group(poiGrouping)
     .transitionDuration(500)
-    .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    .gap(10)    
-    .x(d3.time.scale().domain(d3.extent(points, function(d) { return d.dateRef; })))
-    //.x(d3.scale.linear().domain([19400101, 20150000]))
+    //.centerBar(true)    
+    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
+    //.gap(10)    
+    .x(d3.time.scale().domain(d3.extent(points, function(d) {      
+      return d.dateRef; 
+    })))
+    //.xUnits(d3.time.day)
     .elasticY(true) 
     .elasticX(false)       
-    .renderHorizontalGridLines(true)
+    .renderHorizontalGridLines(true)    
+    .on('zoomed', function(chart, filter) {
+      console.log("you just zoomed!")
+      // console.log("chart.xOriginalDomain: ", chart.xOriginalDomain()) 
+      // console.log("current domain = chart.filters(): ", chart.x().domain())      
+      // console.log("chart.zoomOutRestrict: ", chart.zoomOutRestrict())      
+
+      deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
+      console.log("deltaYear: ", deltaYear)
+
+
+      //handle weird case where zoom is stuck at same deltaYear 
+      //and keeps zooming out but focus is stuck at this level      
+      if (saveLevel - deltaYear === 0) {
+        console.log("init0: ", init_domain0)
+        console.log("chart00: ", chart.filters()[0][0])
+
+        console.log("init1: ", init_domain1)
+        console.log("chart01: ", chart.filters()[0][1])
+
+        console.log("compare0: ", init_domain0.getTime() === chart.filters()[0][0].getTime())
+        console.log("compare1: ", init_domain1.getTime() === chart.filters()[0][1].getTime())
+
+        //only reset to default domain when no change in domain is happening at either ends
+        if ( init_domain0.getTime() === chart.filters()[0][0].getTime() &&
+            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {
+          console.log("trying to zoom out to 5")
+          chart.x().domain(chart.xOriginalDomain());
+          // dc.refocusAll()
+          // chart.filterAll();
+          chart.render();
+        }
+      } else if ( deltaYear < 3 ) {
+              console.log("deltaYear < 3. Day grouping.")
+              chart.group(poiDayGrouping)
+      } else if ( deltaYear > 3 ) {
+              console.log("deltaYear > 3. Month grouping.")
+              chart.group(poiGrouping);                     
+      }
+
+      //reset to current values for comparison with next iteration through zoom handler
+      saveLevel = deltaYear;       
+      init_domain0 = chart.filters()[0][0];
+      init_domain1 = chart.filters()[0][1];
+
+      //esjewett
+      // if( deltaYear < 3 && currentGranularity === 'month') {
+      //   console.log("set day")
+      //   console.log("chart.filters[0][1]: ", chart.filters()[0][1].getFullYear())
+      //   console.log("chart.filters[0][0]: ", chart.filters()[0][0].getFullYear())
+      //   currentGranularity = 'day';
+      //   chart.group(poiDayGrouping);
+      //   chart.render();
+
+      // } else if (deltaYear >= 3 && currentGranularity === 'day') {
+      //   console.log("set month")
+      //   console.log("chart.filters[0][1]: ", chart.filters()[0][1].getFullYear())
+      //   console.log("chart.filters[0][0]: ", chart.filters()[0][0].getFullYear())
+      //   currentGranularity = 'month';
+      //   chart.group(poiGrouping);
+      //   chart.render();
+      // } else {
+      //   console.log("what are you doing?")
+      //   console.log("chart.filters: ", chart.filters())
+      // }
+    })
     .xAxis().tickFormat();   
 
 
