@@ -18,8 +18,8 @@ var decadeColours = d3.scale.ordinal()
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat.json", function(data) {
-d3.tsv("analogues_select.json", function(data) {  
+d3.tsv("analogues_reformat.json", function(data) {
+//d3.tsv("analogues_select.json", function(data) {  
     
   data.forEach(function (d, idx) {      
 
@@ -32,11 +32,9 @@ d3.tsv("analogues_select.json", function(data) {
     else if (yr >= 1980 && yr <= 1989) d.dateAnlg = "1980-1989";    
     else if (yr >= 1990 && yr <= 1999) d.dateAnlg = "1990-1999";
     else if (yr >= 2000 && yr <= 2009) d.dateAnlg = "2000-2009";
-    else if (yr >= 2010 && yr <= 2019) d.dateAnlg = "2010-2019";
-    // other ?
+    else if (yr >= 2010 && yr <= 2019) d.dateAnlg = "2010-2019";    
     
-    d.dateRef = dateFormat.parse(d.dateRef);
-    //d.month = d3.time.month(d.dateRef); 
+    d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
     
   });  
   points=data;
@@ -64,12 +62,11 @@ function initCrossfilter() {
  
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
-    return d.dateRef;
-    //return d.month;   
+    return d.dateRef; //resolves to the day    
   });
   poiDayGrouping = poiDimension.group();
   poiGrouping = poiDimension.group(function(d) {
-    return d3.time.month(d);
+    return d3.time.month(d); //resolves to the month
   });
 
   //-----------------------------------  
@@ -96,82 +93,42 @@ function initCrossfilter() {
     .dimension(poiDimension)
     .group(poiGrouping)
     .transitionDuration(500)
-    //.centerBar(true)    
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    //.gap(10)    
-    .x(d3.time.scale().domain(d3.extent(points, function(d) {      
+    .centerBar(true)    
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
+    .gap(10)    
+    .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
-    })))
-    //.xUnits(d3.time.day)
+    })))    
     .elasticY(true) 
-    .elasticX(false)       
-    .renderHorizontalGridLines(true)    
+    .elasticX(false)
+    .renderHorizontalGridLines(true)
     .on('zoomed', function(chart, filter) {
-      console.log("you just zoomed!")
-      // console.log("chart.xOriginalDomain: ", chart.xOriginalDomain()) 
-      // console.log("current domain = chart.filters(): ", chart.x().domain())      
-      // console.log("chart.zoomOutRestrict: ", chart.zoomOutRestrict())      
 
       deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
-      console.log("deltaYear: ", deltaYear)
-
 
       //handle weird case where zoom is stuck at same deltaYear 
       //and keeps zooming out but focus is stuck at this level      
       if (saveLevel - deltaYear === 0) {
-        console.log("init0: ", init_domain0)
-        console.log("chart00: ", chart.filters()[0][0])
-
-        console.log("init1: ", init_domain1)
-        console.log("chart01: ", chart.filters()[0][1])
-
-        console.log("compare0: ", init_domain0.getTime() === chart.filters()[0][0].getTime())
-        console.log("compare1: ", init_domain1.getTime() === chart.filters()[0][1].getTime())
-
         //only reset to default domain when no change in domain is happening at either ends
         if ( init_domain0.getTime() === chart.filters()[0][0].getTime() &&
-            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {
-          console.log("trying to zoom out to 5")
+            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {          
           chart.x().domain(chart.xOriginalDomain());
           // dc.refocusAll()
           // chart.filterAll();
           chart.render();
         }
       } else if ( deltaYear < 3 ) {
-              console.log("deltaYear < 3. Day grouping.")
               chart.group(poiDayGrouping)
       } else if ( deltaYear > 3 ) {
-              console.log("deltaYear > 3. Month grouping.")
-              chart.group(poiGrouping);                     
+              chart.group(poiGrouping);
       }
 
       //reset to current values for comparison with next iteration through zoom handler
-      saveLevel = deltaYear;       
+      saveLevel = deltaYear;
       init_domain0 = chart.filters()[0][0];
       init_domain1 = chart.filters()[0][1];
-
-      //esjewett
-      // if( deltaYear < 3 && currentGranularity === 'month') {
-      //   console.log("set day")
-      //   console.log("chart.filters[0][1]: ", chart.filters()[0][1].getFullYear())
-      //   console.log("chart.filters[0][0]: ", chart.filters()[0][0].getFullYear())
-      //   currentGranularity = 'day';
-      //   chart.group(poiDayGrouping);
-      //   chart.render();
-
-      // } else if (deltaYear >= 3 && currentGranularity === 'day') {
-      //   console.log("set month")
-      //   console.log("chart.filters[0][1]: ", chart.filters()[0][1].getFullYear())
-      //   console.log("chart.filters[0][0]: ", chart.filters()[0][0].getFullYear())
-      //   currentGranularity = 'month';
-      //   chart.group(poiGrouping);
-      //   chart.render();
-      // } else {
-      //   console.log("what are you doing?")
-      //   console.log("chart.filters: ", chart.filters())
-      // }
     })
-    .xAxis().tickFormat();   
+    .xAxis().tickFormat();
 
 
    //-----------------------------------
@@ -181,9 +138,9 @@ function initCrossfilter() {
     .margins({top: 10, right: 10, bottom: 30, left: 10})  
     .dimension(decadeDimension)
     .group(decadeGrouping)    
-    // .title(function (p) {      
-    //   return p.key +": "+ p.value +" analogues";
-    // })    
+    .title(function (p) {      
+      return p.key +": "+ p.value +" analogues";
+    })    
     .colors(decadeColours)
     .elasticX(true)
     .gap(2)
