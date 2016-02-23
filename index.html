@@ -19,6 +19,7 @@
 
   
   <script src="lib/dc.min.js"></script>
+  <!--<script src="lib/dc.beta26.js"></script>-->
   <link rel="stylesheet" href="lib/dc.min.css" />
 
   <script src="setup.js"></script>
@@ -65,15 +66,16 @@
     <div class="container">
       <div class="row">
         <div class="dc-chart col-md-6" id="chart-poi">
-          <div class="dc-chart-title">Period of Interest</div>          
-          <a class="reset" href="javascript:poiChart.filterAll().focus(null);dc.redrawAll();" style="display: none;">reset</a>
+          <div class="dc-chart-title">Period of Interest</div>
+          <a class="reset" href="javascript:dc.refocusAll();poiChart.filterAll();dc.redrawAll();" 
+             style="display: none;">reset</a>
           <span class="reset" style="display: none;"><span class="filter"></span></span>
           <br>
         </div>
         
       </div>    
 
-      <div class="row">          
+      <div class="row">
         <div class="dc-chart col-md-2" id="chart-decade">
           <div class="dc-chart-title">Archive decade</div>
           <a class="reset" href="javascript:decadeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
