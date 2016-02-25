@@ -18,21 +18,20 @@ var decadeColours = d3.scale.ordinal()
 //====================================================================
 function init() {
 
-d3.tsv("analogues_reformat.json", function(data) {
-//d3.tsv("analogues_select.json", function(data) {  
+//d3.tsv("analogues_reformat.json", function(data) {
+d3.tsv("analogues_select.json", function(data) {  
     
   data.forEach(function (d, idx) {      
 
     yr = parseInt(d.dateAnlg.substring(0, 4));
 
-    if (yr >= 1940 && yr <= 1949) d.dateAnlg = "1940-1949";
-    else if (yr >= 1950 && yr <= 1959) d.dateAnlg = "1950-1959";
-    else if (yr >= 1960 && yr <= 1969) d.dateAnlg = "1960-1969";
-    else if (yr >= 1970 && yr <= 1979) d.dateAnlg = "1970-1979";    
-    else if (yr >= 1980 && yr <= 1989) d.dateAnlg = "1980-1989";    
-    else if (yr >= 1990 && yr <= 1999) d.dateAnlg = "1990-1999";
-    else if (yr >= 2000 && yr <= 2009) d.dateAnlg = "2000-2009";
-    else if (yr >= 2010 && yr <= 2019) d.dateAnlg = "2010-2019";    
+    if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
+    else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
+    else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
+    else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
+    else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
+    else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
+    else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
     
     d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
     
@@ -74,6 +73,31 @@ function initCrossfilter() {
     return d.dateAnlg;
   });
   decadeGrouping = decadeDimension.group();
+  // decadeGrouping = decadeDimension.group().reduce(
+
+  //   //Fns to scale count in decade 1946-1955.
+  //   function (p, v) {
+  //     ++p.count;
+
+  //     console.log("p: ", p)
+  //     console.log("v: ", v)
+
+  //     return p;
+  //   },
+
+  //   function (p, v) {
+  //     --p.count;
+
+  //     return p;
+  //   },
+
+  //   function () {
+  //     return {
+  //       count: 0
+  //       //scaledCount: 0
+  //     };
+  //   }
+  // );
 
   //-----------------------------------
   poiChart  = dc.barChart("#chart-poi");  
@@ -94,7 +118,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
+    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
