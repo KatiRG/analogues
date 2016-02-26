@@ -7,6 +7,8 @@ var poiGrouping;
 var decadeDimension;
 var decadeGrouping;
 
+var slpDates;
+var slpDateFormat = d3.time.format('%d-%m-%Y');
 
 var dateFormat = d3.time.format('%Y%m%d');
 
@@ -119,7 +121,7 @@ function initCrossfilter() {
     .transitionDuration(500)
     .centerBar(true)    
     //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    .filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510222")))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510101")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -127,6 +129,7 @@ function initCrossfilter() {
     .elasticY(true) 
     .elasticX(false)
     .renderHorizontalGridLines(true)
+    //.on("filtered", my_func)
     .on('zoomed', function(chart, filter) {
 
       deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
@@ -154,6 +157,16 @@ function initCrossfilter() {
       init_domain1 = chart.filters()[0][1];
     })
     .xAxis().tickFormat();
+
+    function my_func() {
+        console.log("et donc voila:", poiChart.filters());
+    };
+
+    slpDates = poiChart.filter();
+    slpDates[0] = slpDateFormat(slpDates[0]);
+    slpDates[1] = slpDateFormat(slpDates[1]);
+
+    console.log("slpDates ", slpDates)
 
 
    //-----------------------------------
