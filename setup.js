@@ -7,6 +7,8 @@ var poiGrouping;
 var decadeDimension;
 var decadeGrouping;
 
+var slpDateFormat = d3.time.format('%d-%b-%Y');
+var poiDates = [];
 
 var dateFormat = d3.time.format('%Y%m%d');
 
@@ -17,6 +19,8 @@ var decadeColours = d3.scale.ordinal()
 
 //====================================================================
 function init() {
+
+
 
 //d3.tsv("analogues_reformat.json", function(data) {
 d3.tsv("analogues_select.json", function(data) {  
@@ -40,7 +44,6 @@ d3.tsv("analogues_select.json", function(data) {
 
   initCrossfilter();
 
-
   // Render the total.
   d3.selectAll("#total")
     .text(filter.size());
@@ -48,6 +51,7 @@ d3.tsv("analogues_select.json", function(data) {
   //initList();
 
   update1();
+  
 
 });
 
@@ -55,6 +59,7 @@ d3.tsv("analogues_select.json", function(data) {
 
 //====================================================================
 function initCrossfilter() {
+
 
   //-----------------------------------
   filter = crossfilter(points);
@@ -126,7 +131,8 @@ function initCrossfilter() {
     })))    
     .elasticY(true) 
     .elasticX(false)
-    .renderHorizontalGridLines(true)
+    .renderHorizontalGridLines(true)    
+    .on("filtered", getBrushDates)
     .on('zoomed', function(chart, filter) {
 
       deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
@@ -136,7 +142,7 @@ function initCrossfilter() {
       if (saveLevel - deltaYear === 0) {
         //only reset to default domain when no change in domain is happening at either ends
         if ( init_domain0.getTime() === chart.filters()[0][0].getTime() &&
-            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {          
+            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {
           chart.x().domain(chart.xOriginalDomain());
           // dc.refocusAll()
           // chart.filterAll();
@@ -155,6 +161,11 @@ function initCrossfilter() {
     })
     .xAxis().tickFormat();
 
+    function getBrushDates() {      
+      poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
+      poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();      
+    }
+
 
    //-----------------------------------
   decadeChart
@@ -171,10 +182,8 @@ function initCrossfilter() {
     .gap(2)
     .xAxis().ticks(4);  
 
- 
-
   //-----------------------------------
-  dc.renderAll();
+  dc.renderAll();  
 
 }
 
