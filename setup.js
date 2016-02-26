@@ -7,60 +7,67 @@ var poiGrouping;
 var decadeDimension;
 var decadeGrouping;
 
-var slpDates;
-var slpDateFormat = d3.time.format('%d-%m-%Y');
+//poiDates to be passed to ferret command
+var slpDateFormat = d3.time.format('%d-%b-%Y');
+var poiDates = [];
 
 var dateFormat = d3.time.format('%Y%m%d');
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
-    .range(["#67739F", "#67739F", "#67739F", "#67739F", "#B1CEF5", 
+    .range(["#67739F", "#67739F", "#67739F", "#67739F", "#B1CEF5",
             "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
 
 //====================================================================
+
 function init() {
 
-//d3.tsv("analogues_reformat.json", function(data) {
-d3.tsv("analogues_select.json", function(data) {  
-    
-  data.forEach(function (d, idx) {      
+  $(document).ready(function() {
+   
+    d3.tsv("analogues_reformat.json", function(data) {
+    //d3.tsv("analogues_select.json", function(data) {
 
-    yr = parseInt(d.dateAnlg.substring(0, 4));
+      data.forEach(function (d, idx) {
 
-    if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
-    else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
-    else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
-    else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
-    else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
-    else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
-    else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
-    
-    d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
-    
-  });  
-  points=data;
+        yr = parseInt(d.dateAnlg.substring(0, 4));
 
-  initCrossfilter();
+        if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
+        else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
+        else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
+        else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
+        else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
+        else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
+        else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
+
+        d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
+
+      });
+      points=data;
+
+      initCrossfilter();
 
 
-  // Render the total.
-  d3.selectAll("#total")
-    .text(filter.size());
+      // Render the total.
+      d3.selectAll("#total")
+        .text(filter.size());
 
-  //initList();
+      //initList();
 
-  update1();
+      update1();
 
-});
+    }); //end tsv
 
-}
+  }); //end document.ready
+} //end init()
 
 //====================================================================
 function initCrossfilter() {
 
+    var n=1;
+
   //-----------------------------------
   filter = crossfilter(points);
- 
+
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
     return d.dateRef; //resolves to the day    
@@ -71,7 +78,7 @@ function initCrossfilter() {
   });
 
   //-----------------------------------  
-  decadeDimension = filter.dimension(function(d) {    
+  decadeDimension = filter.dimension(function(d) {
     return d.dateAnlg;
   });
   decadeGrouping = decadeDimension.group();
@@ -99,11 +106,9 @@ function initCrossfilter() {
   //       //scaledCount: 0
   //     };
   //   }
-  // );
-
-  //-----------------------------------
-  poiChart  = dc.barChart("#chart-poi");  
-  decadeChart  = dc.rowChart("#chart-decade");  
+//-----------------------------------
+  poiChart  = dc.barChart("#chart-poi");
+  decadeChart  = dc.rowChart("#chart-decade");
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
@@ -112,34 +117,33 @@ function initCrossfilter() {
   var init_domain0 = dateFormat.parse("21000101"), init_domain1 = dateFormat.parse("2100101");
   poiChart
     .width(780)
-    .height(200)    
-    .margins({top: 10, right: 20, bottom: 30, left: 40})  
-    .mouseZoomable(true) 
+    .height(200)
+    .margins({top: 10, right: 20, bottom: 30, left: 40})
+    .mouseZoomable(true)
     //.brushOn(false)    
     .dimension(poiDimension)
     .group(poiGrouping)
     .transitionDuration(500)
-    .centerBar(true)    
+    .centerBar(true)
     //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    .filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510101")))    
-    .gap(10)    
+    .filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19511231")))
+    .gap(10)
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
-      return d.dateRef; 
-    })))    
-    .elasticY(true) 
+      return d.dateRef;
+    })))
+    .elasticY(true)
     .elasticX(false)
     .renderHorizontalGridLines(true)
-    //.on("filtered", my_func)
+    .on("renderlet.filters", getBrushDates)
     .on('zoomed', function(chart, filter) {
-
-      deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
+        deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
 
       //handle weird case where zoom is stuck at same deltaYear 
       //and keeps zooming out but focus is stuck at this level      
       if (saveLevel - deltaYear === 0) {
         //only reset to default domain when no change in domain is happening at either ends
         if ( init_domain0.getTime() === chart.filters()[0][0].getTime() &&
-            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {          
+            init_domain1.getTime() === chart.filters()[0][1].getTime() ) {
           chart.x().domain(chart.xOriginalDomain());
           // dc.refocusAll()
           // chart.filterAll();
@@ -158,42 +162,66 @@ function initCrossfilter() {
     })
     .xAxis().tickFormat();
 
-    function my_func() {
-        console.log("et donc voila:", poiChart.filters());
-    };
-
-    slpDates = poiChart.filter();
-    slpDates[0] = slpDateFormat(slpDates[0]);
-    slpDates[1] = slpDateFormat(slpDates[1]);
-
-    console.log("slpDates ", slpDates)
+    function getBrushDates() {
+      poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
+      poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
+      console.log(poiDates)
+    }
 
 
-   //-----------------------------------
+
+//-----------------------------------
   decadeChart
     .width(380)
     .height(200)
-    .margins({top: 10, right: 10, bottom: 30, left: 10})  
+    .margins({top: 10, right: 10, bottom: 30, left: 10})
     .dimension(decadeDimension)
-    .group(decadeGrouping)    
-    .title(function (p) {      
+    .group(decadeGrouping)
+    .title(function (p) {
       return p.key +": "+ p.value +" analogues";
-    })    
+    })
     .colors(decadeColours)
     .elasticX(true)
     .gap(2)
-    .xAxis().ticks(4);  
-
- 
+    .xAxis().ticks(4);
 
   //-----------------------------------
   dc.renderAll();
 
-}
+  $("#command").on("click",function(event) {
+
+      var       command = $("#command").val();
+
+      console.log("command value: ", command);
+      console.log("poiDates in $: ", poiDates);
+      console.log("dateStart: ", poiDates[0]);
+
+      //dateStart = day+"-"+month+"-"+year;
+      //dateEnd = day+"-"+month+"-"+year;
+      dateStart = poiDates[0];
+      dateEnd = poiDates[1];
+      
+      HTMLCmd = "maps2_run.php" + "?"
+                + "command=" + command
+                + "&dateStart=" + dateStart
+                + "&dateEnd=" + dateEnd;
+
+      $('body').append("<div id='map"+n+"'><img src='"+ HTMLCmd +"' alt='' /></div>")
+      $('#map'+n).dialog({
+        title: "map #"+n,
+        width: 830,
+        height: 660,
+      });
+      n++;
+
+  }); //end $command
+
+
+} //end initCrossfilter
 
 //====================================================================
 // Update map markers, list and number of selected
-function update0() {  
+function update0() { 
   //updateList();
   d3.select("#active").text(filter.groupAll().value());
 }
@@ -201,7 +229,7 @@ function update0() {
 //====================================================================
 // Update dc charts, map markers, list and number of selected
 function update1() {
-  dc.redrawAll();  
+  dc.redrawAll();
   //updateList();
   d3.select("#active").text(filter.groupAll().value());
 }
@@ -209,126 +237,126 @@ function update1() {
 //====================================================================
 function initList() {
   var proxyItem = d3.select("#proxiesListTitle")
-  		.append("div")
-  		.attr("class", "row");
+                .append("div")
+                .attr("class", "row");
   proxyItem.append("div")
-   	.attr("class", "col-md-1")
-   	.style("width", "50px")
-   	.text("Id");
+        .attr("class", "col-md-1")
+        .style("width", "50px")
+        .text("Id");
   proxyItem.append("div")
-   	.attr("class", "col-md-1")
-   	.style("width", "80px")
-   	.style("text-align", "right")
-   	.text("Depth");
+        .attr("class", "col-md-1")
+        .style("width", "80px")
+        .style("text-align", "right")
+        .text("Depth");
   proxyItem.append("div")
-   	.attr("class", "col-md-1")
-   	.style("text-align", "right")
-   	.text("Most recent");
+        .attr("class", "col-md-1")
+        .style("text-align", "right")
+        .text("Most recent");
   proxyItem.append("div")
-   	.attr("class", "col-md-1")
-   	.style("text-align", "right")
-   	.text("Oldest");
+        .attr("class", "col-md-1")
+        .style("text-align", "right")
+        .text("Oldest");
   proxyItem.append("div")
-   	.attr("class", "col-md-1")
-   	.style("text-align", "left")
-   	.text("Archive");
-  proxyItem.append("div")
-   	.attr("class", "col-md-2")
-   	.style("text-align", "left")
-   	.text("Material");
+        .attr("class", "col-md-1")
+        .style("text-align", "left")
+        .text("Archive");
   proxyItem.append("div")
         .attr("class", "col-md-2")
-   	.style("text-align", "left")
-   	.text("DOI");
+        .style("text-align", "left")
+        .text("Material");
+  proxyItem.append("div")
+        .attr("class", "col-md-2")
+        .style("text-align", "left")
+        .text("DOI");
   proxyItem.append("div")
         .attr("class", "col-md-3")
-   	.style("width", "350px")
-   	.style("text-align", "left")
-   	.text("Reference");
+        .style("width", "350px")
+        .style("text-align", "left")
+        .text("Reference");
 
   format1 = d3.format(".0f");
   format2 = d3.format(".2f");
 
-  var pointIds = idGrouping.all();
+var pointIds = idGrouping.all();
   for (var i = 0; i < pointIds.length; i++) {
-  	var proxyItem = d3.select("#proxiesList")
-    			.append("div")
-    			.attr("class", "proxyItem row")
-         		.attr("id", (i+1).toString());
-  	proxyItem.append("div")
-         	.attr("class", "col-md-1")
-   		.style("width", "50px")
-         	.attr("title", "#"+ points[i].Id)
-         	.text("#"+points[i].Id)
-		.on("mouseover", function() { d3.select(this).style("font-weight", "bold"); })
-		.on("mouseout", function() { d3.select(this).style("font-weight", "normal"); })
-		.on('click', popupfromlist);
-  	proxyItem.append("div")
-         	.attr("class", "col-md-1")
-   		.style("width", "80px")
-         	.style("text-align", "right")
-		.style("color", "#2EA3DB")
-         	.attr("title", points[i].Depth)
-         	.text(format1(points[i].Depth));
-  	proxyItem.append("div")
-         	.attr("class", "col-md-1")
-         	.style("text-align", "right")
-		.style("color", "#F5B441")
+        var proxyItem = d3.select("#proxiesList")
+                        .append("div")
+                        .attr("class", "proxyItem row")
+                        .attr("id", (i+1).toString());
+        proxyItem.append("div")
+                .attr("class", "col-md-1")
+                .style("width", "50px")
+                .attr("title", "#"+ points[i].Id)
+                .text("#"+points[i].Id)
+                .on("mouseover", function() { d3.select(this).style("font-weight", "bold"); })
+                .on("mouseout", function() { d3.select(this).style("font-weight", "normal"); })
+                .on('click', popupfromlist);
+        proxyItem.append("div")
+                .attr("class", "col-md-1")
+                .style("width", "80px")
+                .style("text-align", "right")
+                .style("color", "#2EA3DB")
+                .attr("title", points[i].Depth)
+                .text(format1(points[i].Depth));
+        proxyItem.append("div")
+                .attr("class", "col-md-1")
+                .style("text-align", "right")
+                .style("color", "#F5B441")
                 .attr("title", points[i].RecentDate)
                 .text(format2(points[i].RecentDate));
         proxyItem.append("div")
                 .attr("class", "col-md-1")
                 .style("text-align", "right")
                 .style("color", "#F5B441")
-         	.attr("title", points[i].OldestDate)
-         	.text(format2(points[i].OldestDate));
-  	proxyItem.append("div")
-         	.attr("class", "col-md-1")
-         	.style("text-align", "left")
-         	.attr("title", points[i].Archive)
-         	.text(points[i].Archive);
-  	proxyItem.append("div")
-         	.attr("class", "col-md-2")
-         	.style("text-align", "left")
-         	.attr("title", points[i].Material)
-         	.text(points[i].Material);
-  	proxyItem.append("div")
-         	.attr("class", "col-md-2")
-         	.style("text-align", "left")
-         	.attr("title", points[i].DOI)
-         	.text(points[i].DOI)
-		.on("mouseover", function() { d3.select(this).style("color", "#0645AD"); })
-		.on("mouseout", function() { d3.select(this).style("color", "#333"); })
-		.on("click", function(d,i) { window.open("https://scholar.google.fr/scholar?q=" + points[i].DOI); });
-  	proxyItem.append("div")
-         	.attr("class", "col-md-3")
-   		.style("width", "350px")
-         	.style("text-align", "left")
-         	.attr("title", points[i].Reference)
-         	.text(points[i].Reference);
+                .attr("title", points[i].OldestDate)
+                .text(format2(points[i].OldestDate));
+        proxyItem.append("div")
+                .attr("class", "col-md-1")
+                .style("text-align", "left")
+                .attr("title", points[i].Archive)
+                .text(points[i].Archive);
+        proxyItem.append("div")
+                .attr("class", "col-md-2")
+                .style("text-align", "left")
+                .attr("title", points[i].Material)
+                .text(points[i].Material);
+        proxyItem.append("div")
+                .attr("class", "col-md-2")
+                .style("text-align", "left")
+                .attr("title", points[i].DOI)
+                .text(points[i].DOI)
+                .on("mouseover", function() { d3.select(this).style("color", "#0645AD"); })
+                .on("mouseout", function() { d3.select(this).style("color", "#333"); })
+                .on("click", function(d,i) { window.open("https://scholar.google.fr/scholar?q=" + points[i].DOI); });
+        proxyItem.append("div")
+                .attr("class", "col-md-3")
+                .style("width", "350px")
+                .style("text-align", "left")
+                .attr("title", points[i].Reference)
+                .text(points[i].Reference);
   }
 }
 
 //====================================================================
 function popupfromlist() {
-	var id = d3.select(this).text().split('#').pop();
-	var i = id -1;
-	var lng = points[i].Longitude;
-	var lat = points[i].Latitude;
-	//map.setView(new L.LatLng(lat,lng), 6);
-	//map.panTo(new L.LatLng(lat,lng));
-	//markers[i].openPopup();
-	// https://github.com/Leaflet/Leaflet.markercluster/issues/46
-	var m = markers[i];
-	markerGroup.zoomToShowLayer(m, function () {
-				map.setView(new L.LatLng(lat,lng), 6);  // added to handle single marker
-				m.openPopup();
-			});
-	var container = $("#proxiesList");
-	var scrollTo = $("#" + id);
-	container.scrollTop( scrollTo.offset().top - container.offset().top + container.scrollTop() );
+        var id = d3.select(this).text().split('#').pop();
+        var i = id -1;
+        var lng = points[i].Longitude;
+        var lat = points[i].Latitude;
+        //map.setView(new L.LatLng(lat,lng), 6);
+        //map.panTo(new L.LatLng(lat,lng));
+        //markers[i].openPopup();
+        // https://github.com/Leaflet/Leaflet.markercluster/issues/46
+        var m = markers[i];
+        markerGroup.zoomToShowLayer(m, function () {
+                                map.setView(new L.LatLng(lat,lng), 6);  // added to handle single marker
+                                m.openPopup();
+                        });
+        var container = $("#proxiesList");
+        var scrollTo = $("#" + id);
+        container.scrollTop( scrollTo.offset().top - container.offset().top + container.scrollTop() );
         $(".proxyItem").css("font-weight", "normal");
-	$("#"+this.id).css("font-weight", "bold");
+        $("#"+this.id).css("font-weight", "bold");
 }
 
 //====================================================================
@@ -336,9 +364,9 @@ function updateList() {
   var pointIds = idGrouping.all();
   for (var i = 0; i < pointIds.length; i++) {
     if (pointIds[i].value > 0)
-	 $("#"+(i+1)).show();
+         $("#"+(i+1)).show();
     else
-	 $("#"+(i+1)).hide();
+         $("#"+(i+1)).hide();
   }
 }
 //====================================================================
