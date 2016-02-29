@@ -17,13 +17,22 @@ var decadeColours = d3.scale.ordinal()
     .range(["#67739F", "#67739F", "#67739F", "#67739F", "#B1CEF5", 
             "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
 
+
+// fitChart vars
+var corrRange = [-0.1, 1.0];
+var disRange = [-1400.0, -250.0];
+//select dataset
+// var corrRange = [0, 1.0];
+// var disRange = [-700., -300.0];
 //====================================================================
 function init() {
 
 
 
 //d3.tsv("analogues_reformat.json", function(data) {
-d3.tsv("analogues_select.json", function(data) {  
+//d3.tsv("analogues_select.json", function(data) {
+//d3.tsv("analogues_reformat_all_select.json", function(data) {
+d3.tsv("analogues_reformat_all.json", function(data) {  
     
   data.forEach(function (d, idx) {      
 
@@ -38,6 +47,8 @@ d3.tsv("analogues_select.json", function(data) {
     else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
     
     d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
+    d.Dis = d3.format(",.2f")(+d.Dis);
+    d.Corr = d3.format(",.2f")(+d.Corr);
     
   });  
   points=data;
@@ -78,35 +89,18 @@ function initCrossfilter() {
     return d.dateAnlg;
   });
   decadeGrouping = decadeDimension.group();
-  // decadeGrouping = decadeDimension.group().reduce(
 
-  //   //Fns to scale count in decade 1946-1955.
-  //   function (p, v) {
-  //     ++p.count;
-
-  //     console.log("p: ", p)
-  //     console.log("v: ", v)
-
-  //     return p;
-  //   },
-
-  //   function (p, v) {
-  //     --p.count;
-
-  //     return p;
-  //   },
-
-  //   function () {
-  //     return {
-  //       count: 0
-  //       //scaledCount: 0
-  //     };
-  //   }
-  // );
+  //-----------------------------------  
+  fitDimension = filter.dimension(function(d) {
+    //return [d.binOldestDate, d.binRecentDate, d.archiveIndex];    
+    return [d.Dis, d.Corr]; //[x, y]
+  });
+  fitGrouping = fitDimension.group();
 
   //-----------------------------------
   poiChart  = dc.barChart("#chart-poi");  
-  decadeChart  = dc.rowChart("#chart-decade");  
+  decadeChart  = dc.rowChart("#chart-decade");
+  fitChart = dc.scatterPlot("#chart-fit");  
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
@@ -124,7 +118,7 @@ function initCrossfilter() {
     .transitionDuration(500)
     .centerBar(true)    
     //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    .filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510130")))
+    //.filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510130")))
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -167,7 +161,7 @@ function initCrossfilter() {
     }
 
 
-   //-----------------------------------
+  //-----------------------------------
   decadeChart
     .width(380)
     .height(200)
@@ -180,7 +174,70 @@ function initCrossfilter() {
     .colors(decadeColours)
     .elasticX(true)
     .gap(2)
-    .xAxis().ticks(4);  
+    .xAxis().ticks(4);
+
+  //-----------------------------------
+  fitChart
+    .width(380)
+    .height(212)
+    .margins({
+      top: 10,
+      right: 20,
+      bottom: 30,
+      left: 40
+    })
+    .dimension(fitDimension)
+    .group(fitGrouping)
+    .xAxisLabel("Distance")
+    .yAxisLabel("Corr")
+    .on("preRedraw", update0)
+    //.mouseZoomable(true)
+    .x(d3.scale.linear().domain(disRange))
+    .y(d3.scale.linear().domain(corrRange))
+    // .x(d3.scale.linear().domain([-700, -300]))
+    // .y(d3.scale.linear().domain([-0.1, 1.]))    
+    .renderHorizontalGridLines(true)
+    .renderVerticalGridLines(true)
+    .symbolSize(8)
+    .highlightedSize(8)
+    .existenceAccessor(function(d) {      
+      return d.value > 0;
+    })
+    .colorAccessor(function(d) {
+      return d.key[2];
+    })
+    // .colors(archiveColors)
+    .filterHandler(function(dim, filters) {
+      if (!filters || !filters.length)
+        dim.filter(null);
+      else {
+        // assume it's one RangedTwoDimensionalFilter
+        dim.filterFunction(function(d) {
+          return filters[0].isFiltered([d[0], d[1]]);
+        })
+      }
+    });
+    // // https://jsfiddle.net/gordonwoodhull/c593ehh7/5/
+    // .colors("#ff0000");
+
+    xAxis_fitChart = fitChart.xAxis();
+    xAxis_fitChart.ticks(6).tickFormat(d3.format("d"));
+    yAxis_fitChart = fitChart.yAxis();
+    yAxis_fitChart.ticks(6).tickFormat(d3.format("d"));  
+
+  // fitChart
+  // .width(380)
+  // .height(200)
+  // .x(d3.scale.linear().domain([-700, -300]))
+  // .y(d3.scale.linear().domain([-0.1, 1.]))
+  // .xAxisLabel("Distance")
+  // .yAxisLabel("Correlation")
+  // .symbolSize(8)
+  // .clipPadding(10)
+  // .dimension(fitDimension)
+  // .group(fitGrouping)
+  // .elasticX(true);
+
 
   //-----------------------------------
   dc.renderAll();  

@@ -76,20 +76,33 @@
       </div>    
 
       <div class="row">
-        <div class="dc-chart col-md-2" id="chart-decade">
+        <div class="dc-chart col-md-4" id="chart-decade">
           <div class="dc-chart-title">Archive decade</div>
           <a class="reset" href="javascript:decadeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
           <br>
         </div>
+
+        <div class="dc-chart col-md-4" id="chart-fit">
+          <div class="dc-chart-title">Corr vs Dis</div>
+          <a class="reset" href="javascript:fitChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+          <br>
+        </div>
+
+        <div class="dc-chart col-md-4" id="chart-dis">
+          <div class="dc-chart-title">Distance</div>
+          <a class="reset" href="javascript:disChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+          <br>
+        </div>
+
       </div>
 
       <div class="row">
         <div id="totals"><span id="active">-</span> of <span id="total">-</span> analogues selected</div>
       </div>
-      <div class="row">
+      <!--<div class="row">
         <div id="proxiesListTitle" class="col-md-12"></div>
         <div id="proxiesList" class="col-md-12" style="max-height: 160px; overflow-y:auto;"></div>
-      </div>
+      </div>-->
     </div>
     <!-- /.container -->
 
