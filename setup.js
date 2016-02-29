@@ -19,15 +19,20 @@ var decadeColours = d3.scale.ordinal()
 
 
 // fitChart vars
-var corrRange = [-0.1, 1.0];
-var disRange = [-1400.0, -250.0];
+var corrRange = [-0.15, 1.0];
+var disRange = [-1500, -250.0];
+var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
 //d3.tsv("analogues_reformat_all_select.json", function(data) {
 d3.tsv("analogues_reformat_all.json", function(data) {  
     
-  data.forEach(function (d, idx) {      
+  data.forEach(function (d, idx) {
+
+    d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
+    d.Dis = +d.Dis;
+    d.Corr = +d.Corr;
 
     yr = parseInt(d.dateAnlg.substring(0, 4));
 
@@ -39,9 +44,9 @@ d3.tsv("analogues_reformat_all.json", function(data) {
     else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
     else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
     
-    d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
-    d.Dis = +d.Dis;
-    d.Corr = +d.Corr;
+    //bin correlation and distance
+    d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
+    d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
     
   });  
   points=data;
