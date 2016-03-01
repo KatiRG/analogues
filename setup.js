@@ -17,6 +17,10 @@ var decadeColours = d3.scale.ordinal()
     .range(["#67739F", "#67739F", "#67739F", "#67739F", "#B1CEF5", 
             "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
 
+var seasonColours = d3.scale.ordinal()
+    .range(["#9DD8D3", "#FFE545", "#A9DB66", "#FFAD5D"]);    
+var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
+
 
 // fitChart vars
 var corrRange = [-0.15, 1.0];
@@ -25,8 +29,8 @@ var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat_all_select.json", function(data) {
-d3.tsv("analogues_reformat_all.json", function(data) {  
+d3.tsv("analogues_reformat_all_select.json", function(data) {
+//d3.tsv("analogues_reformat_all.json", function(data) {  
     
   data.forEach(function (d, idx) {
 
@@ -35,8 +39,9 @@ d3.tsv("analogues_reformat_all.json", function(data) {
     d.Corr = +d.Corr;
 
     yr = parseInt(d.dateAnlg.substring(0, 4));
+    
 
-    if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
+         if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
     else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
     else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
     else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
@@ -47,6 +52,13 @@ d3.tsv("analogues_reformat_all.json", function(data) {
     //bin correlation and distance
     d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
     d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
+
+    //seasons
+    month = d.dateRef.getMonth();
+         if (month >= 11 && month <= 1) d.Season = 0; //DJF
+    else if (month >= 2 && month <= 4) d.Season = 1; //MAM
+    else if (month >= 5 && month <= 7) d.Season = 2; //JJA
+    else if (month >= 8 && month <= 10) d.Season = 3; //SON
     
   });  
   points=data;
@@ -80,6 +92,12 @@ function initCrossfilter() {
   });
 
   //-----------------------------------  
+  seasonDimension = filter.dimension(function(d) {    
+    return d.Season;
+  });
+  seasonGrouping = seasonDimension.group();
+
+  //-----------------------------------  
   decadeDimension = filter.dimension(function(d) {    
     return d.dateAnlg;
   });
@@ -99,6 +117,7 @@ function initCrossfilter() {
 
   //-----------------------------------
   poiChart  = dc.barChart("#chart-poi");
+  seasonsChart = dc.pieChart("#chart-seasons");
   decadeChart  = dc.rowChart("#chart-decade");
   corrChart = dc.barChart("#chart-corr");
   disChart = dc.barChart("#chart-dis");
@@ -118,7 +137,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
+    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -160,15 +179,37 @@ function initCrossfilter() {
       poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();      
     }
 
+  //-----------------------------------
+  seasonsChart
+    .width(5)
+    .height(85)
+    .radius(30)
+    .slicesCap(4)
+    .innerRadius(5)
+    .colors(seasonColours) //DJF, JJA, MAM, SON  
+    .dimension(seasonDimension)
+    .group(seasonGrouping)
+    .label(function(d) {
+      return seasons[d.key];
+    })
+    .title(function(d) {
+      return seasons[d.key];
+    })
+    .valueAccessor(function(d) {      
+      if (d.value != 0) return 0.25;
+    });
+    // .renderlet(function (chart) {
+    //   chart.selectAll("g").attr("transform", "translate(36, 22)");      
+    // });
 
   //-----------------------------------
   decadeChart
     .width(380)
     .height(200)
-    .margins({top: 10, right: 10, bottom: 30, left: 10})  
+    //.margins({top: 10, right: 10, bottom: 30, left: 10})    
     .dimension(decadeDimension)
-    .group(decadeGrouping)    
-    .title(function (p) {      
+    .group(decadeGrouping)
+    .title(function (p) {
       return p.key +": "+ p.value +" analogues";
     })    
     .colors(decadeColours)
@@ -238,21 +279,14 @@ function initCrossfilter() {
   AddXAxis(decadeChart, "Count");
 
   function onresize() {
-    idx = 0;
+    
     dc.chartRegistry.list().forEach(function(chart) {
-      _bbox = chart.root().node().parentNode.getBoundingClientRect();                    
-      console.log("_bbox: ", _bbox)
-      console.log("_bbox.width + height: ", _bbox.width +", "+ _bbox.height)
-      console.log("chart.width + height: ", chart.width() +", "+ chart.height())
-
-      // chart.width(_bbox.width)
-      //      .height(_bbox.height);
-      rescaleFactor = (idx === 0) ? .66 : .30; //idx=0 is poiChart
+      _bbox = chart.root().node().parentNode.getBoundingClientRect(); 
+ 
+      //__dcFlag__ = 1 is poiChart. Scale it differently.
+      rescaleFactor = (chart.__dcFlag__ === 1) ? .66 : .30;
                     
-      chart.width(_bbox.width * rescaleFactor)
-           .height("200");
-
-      idx++;     
+      chart.width(_bbox.width * rescaleFactor);
 
       dc.renderAll();
     });
