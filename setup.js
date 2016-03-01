@@ -25,8 +25,8 @@ var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat_all_select.json", function(data) {
-d3.tsv("analogues_reformat_all.json", function(data) {  
+d3.tsv("analogues_reformat_all_select.json", function(data) {
+//d3.tsv("analogues_reformat_all.json", function(data) {  
     
   data.forEach(function (d, idx) {
 
@@ -65,7 +65,6 @@ d3.tsv("analogues_reformat_all.json", function(data) {
 
 //====================================================================
 function initCrossfilter() {
-
 
   //-----------------------------------
   filter = crossfilter(points);
@@ -118,7 +117,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
+    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -155,10 +154,14 @@ function initCrossfilter() {
     })
     .xAxis().tickFormat();
 
-    function getBrushDates() {      
-      poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
-      poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();      
+    function getBrushDates() {
+      if (poiChart.filters().length > 0) {        
+        poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
+        poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();        
+      }
     }
+
+    
 
 
   //-----------------------------------
@@ -225,6 +228,8 @@ function initCrossfilter() {
   //-----------------------------------
   dc.renderAll();
 
+  
+
   //http://stackoverflow.com/questions/21114336/how-to-add-axis-labels-for-row-chart-using-dc-js-or-d3-js
   function AddXAxis(chartToUpdate, displayText) {
     chartToUpdate.svg()
@@ -267,4 +272,13 @@ function update1() {
   dc.redrawAll();  
   //updateList();
   d3.select("#active").text(filter.groupAll().value());
+}
+
+function zoomCheck() {
+    console.log("check for zoom")
+    console.log("poiChart: ", poiChart)
+    dc.refocusAll();
+    poiChart.filterAll();
+    corrChart.filterAll();
+    disChart.filterAll();
 }
