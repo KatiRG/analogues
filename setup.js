@@ -66,7 +66,6 @@ d3.tsv("analogues_reformat_all.json", function(data) {
 //====================================================================
 function initCrossfilter() {
 
-
   //-----------------------------------
   filter = crossfilter(points);
  
@@ -155,10 +154,14 @@ function initCrossfilter() {
     })
     .xAxis().tickFormat();
 
-    function getBrushDates() {      
-      poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
-      poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();      
+    function getBrushDates() {
+      if (poiChart.filters().length > 0) {        
+        poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
+        poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();        
+      }
     }
+
+    
 
 
   //-----------------------------------
@@ -225,6 +228,8 @@ function initCrossfilter() {
   //-----------------------------------
   dc.renderAll();
 
+  
+
   //http://stackoverflow.com/questions/21114336/how-to-add-axis-labels-for-row-chart-using-dc-js-or-d3-js
   function AddXAxis(chartToUpdate, displayText) {
     chartToUpdate.svg()
@@ -267,4 +272,11 @@ function update1() {
   dc.redrawAll();  
   //updateList();
   d3.select("#active").text(filter.groupAll().value());
+}
+
+function zoomCheck() {
+    dc.refocusAll();
+    poiChart.filterAll();
+    corrChart.filterAll();
+    disChart.filterAll();
 }
