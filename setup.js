@@ -274,11 +274,16 @@ function update1() {
   d3.select("#active").text(filter.groupAll().value());
 }
 
-function zoomCheck() {
-    console.log("check for zoom")
-    console.log("poiChart: ", poiChart)
+function zoomCheck() {    
     dc.refocusAll();
     poiChart.filterAll();
     corrChart.filterAll();
-    disChart.filterAll();
+    disChart.filterAll();   
+    //works only in console
+    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush .extent").attr("width", 0))
+    console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent"))
+    console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent")[0])
+    // console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent")[0][0])
+    // element = d3.select("#chart-dis").select(".brush").select("rect.extent")[0][0]
+    // console.log("resetExtent: ", d3.select(element).attr("width"))    
 }
