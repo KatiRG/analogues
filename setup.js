@@ -111,7 +111,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
     //.filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510130")))
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
