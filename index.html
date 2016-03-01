@@ -18,7 +18,7 @@
   <script src="lib/crossfilter-1.3.12.min.js"></script>
 
   
-  <script src="lib/my_dc.min.js"></script>
+  <script src="lib/my_dc.beta26.js"></script>
   <!--<script src="lib/dc.beta26.js"></script>-->
   <link rel="stylesheet" href="lib/dc.min.css" />
 
@@ -64,6 +64,14 @@
 
     <!-- Begin page content -->
     <div class="container">
+      <div class="row">        
+        <div id="totals"><span id="active">-</span> of <span id="total">-</span> analogues selected
+          <br><br>
+        </div>
+
+      </div>
+
+
       <div class="row">
         <div class="dc-chart col-md-6" id="chart-poi">
           <div class="dc-chart-title">Period of Interest</div>
@@ -82,9 +90,9 @@
           <br>
         </div>
 
-        <div class="dc-chart col-md-4" id="chart-fit">
-          <div class="dc-chart-title">Corr vs Dis</div>
-          <a class="reset" href="javascript:fitChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="dc-chart col-md-4" id="chart-corr">
+          <div class="dc-chart-title">Correlation</div>
+          <a class="reset" href="javascript:corrChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
           <br>
         </div>
 
@@ -96,9 +104,7 @@
 
       </div>
 
-      <div class="row">
-        <div id="totals"><span id="active">-</span> of <span id="total">-</span> analogues selected</div>
-      </div>
+
 
     </div><!-- /.container -->
 

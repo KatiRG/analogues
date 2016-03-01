@@ -86,15 +86,22 @@ function initCrossfilter() {
   decadeGrouping = decadeDimension.group();
 
   //-----------------------------------  
-  fitDimension = filter.dimension(function(d) {    
-    return [d.Dis, d.Corr]; //[x, y]
+  corrDimension = filter.dimension(function(d) {    
+    return d.Corr;
   });
-  fitGrouping = fitDimension.group();
+  corrGrouping = corrDimension.group();
+
+  //-----------------------------------  
+  disDimension = filter.dimension(function(d) {    
+    return d.Dis;
+  });
+  disGrouping = disDimension.group();
 
   //-----------------------------------
-  poiChart  = dc.barChart("#chart-poi");  
+  poiChart  = dc.barChart("#chart-poi");
   decadeChart  = dc.rowChart("#chart-decade");
-  fitChart = dc.scatterPlot("#chart-fit");  
+  corrChart = dc.barChart("#chart-corr");
+  disChart = dc.barChart("#chart-dis");
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
@@ -111,8 +118,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510130")))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -170,55 +176,83 @@ function initCrossfilter() {
     .gap(2)
     .xAxis().ticks(4);
 
-  //-----------------------------------
-  fitChart
+  //-----------------------------------   
+  corrChart
     .width(380)
-    .height(212)
-    .margins({
-      top: 10,
-      right: 20,
-      bottom: 30,
-      left: 40
-    })
-    .dimension(fitDimension)
-    .group(fitGrouping)
-    .xAxisLabel("Distance")
-    .yAxisLabel("Corr")
-    .on("preRedraw", update0)    
-    .x(d3.scale.linear().domain(disRange))
-    .y(d3.scale.linear().domain(corrRange))  
+    .height(200)
+    .margins({top: 10, right: 20, bottom: 30, left: 40})  
+    .centerBar(false)
+    .elasticY(true)
+    .dimension(corrDimension)
+    .group(corrGrouping)
+    .on("preRedraw",update0)
+    .x(d3.scale.linear().domain(corrRange))
+    .xUnits(dc.units.fp.precision(corrBinWidth))
+    //.round(function(d) {return corrBinWidth*Math.floor(d/corrBinWidth)})
+    .gap(0)
     .renderHorizontalGridLines(true)
-    .renderVerticalGridLines(true)
-    .symbolSize(8)
-    .highlightedSize(8);
-    // .existenceAccessor(function(d) {      
-    //   return d.value > 0;
-    // })
-    // .colorAccessor(function(d) {
-    //   return d.key[2];
-    // });
-    // .colors(archiveColors)
-    // .filterHandler(function(dim, filters) {
-    //   if (!filters || !filters.length)
-    //     dim.filter(null);
-    //   else {
-    //     // assume it's one RangedTwoDimensionalFilter
-    //     dim.filterFunction(function(d) {
-    //       return filters[0].isFiltered([d[0], d[1]]);
-    //     })
-    //   }
-    // });
+    .xAxisLabel("Correlation")
+    .yAxisLabel("Count");
 
-    xAxis_fitChart = fitChart.xAxis();
-    xAxis_fitChart.ticks(6).tickFormat(d3.format("d"));
-    yAxis_fitChart = fitChart.yAxis();
-    yAxis_fitChart.ticks(6).tickFormat(d3.format("d"));  
+  xAxis_corrChart = corrChart.xAxis();
+  xAxis_corrChart.ticks(6).tickFormat(d3.format(".1f"));
+  yAxis_corrChart = corrChart.yAxis();
+  yAxis_corrChart.tickFormat(d3.format(",.2s")).tickSubdivide(0);
 
+  //-----------------------------------   
+  disChart
+    .width(380)
+    .height(200)
+    .margins({top: 10, right: 20, bottom: 30, left: 40})  
+    .centerBar(false)
+    .elasticY(true)
+    .dimension(disDimension)
+    .group(disGrouping)
+    .on("preRedraw",update0)
+    .x(d3.scale.linear().domain(disRange))
+    .xUnits(dc.units.fp.precision(disBinWidth))
+    //.round(function(d) {return disBinWidth*Math.floor(d/disBinWidth)})
+    .gap(0)
+    .renderHorizontalGridLines(true)
+    .xAxisLabel("Distance")
+    .yAxisLabel("Count");
+
+  xAxis_disChart = disChart.xAxis();
+  xAxis_disChart.ticks(6).tickFormat(d3.format("d"));
+  yAxis_disChart = disChart.yAxis();
+  yAxis_disChart.tickFormat(d3.format(",.2s")).tickSubdivide(0);
 
   //-----------------------------------
-  dc.renderAll();  
+  dc.renderAll();
 
-}
+  //http://stackoverflow.com/questions/21114336/how-to-add-axis-labels-for-row-chart-using-dc-js-or-d3-js
+  function AddXAxis(chartToUpdate, displayText) {
+    chartToUpdate.svg()
+      .append("text")
+      .attr("class", "x-axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", chartToUpdate.width() / 2)
+      .attr("y", chartToUpdate.height() + 0)
+      .text(displayText);
+  }
+  AddXAxis(decadeChart, "Count");
+
+  function onresize() {
+    dc.chartRegistry.list().forEach(function(chart) {
+      _bbox = chart.root().node().parentNode.getBoundingClientRect();
+      
+    //__dcFlag__ = 1 is poiChart. Scale it differently.
+    rescaleFactor = (chart.__dcFlag__ === 1) ? .66 : .30;
+
+      dc.renderAll();
+    });
+  };
+            
+  onresize();
+  
+  window.addEventListener('resize', onresize);
+
+} //end initCrossfilter()
 
 //====================================================================
 // Update map markers, list and number of selected
