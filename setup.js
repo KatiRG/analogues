@@ -188,7 +188,7 @@ function initCrossfilter() {
     .innerRadius(5)
     .colors(seasonColours) //DJF, JJA, MAM, SON  
     .dimension(seasonDimension)
-    .group(seasonGrouping)
+    .group(seasonGrouping)    
     .label(function(d) {
       return seasons[d.key];
     })
@@ -201,6 +201,15 @@ function initCrossfilter() {
     // .renderlet(function (chart) {
     //   chart.selectAll("g").attr("transform", "translate(36, 22)");      
     // });
+
+  d3.select('#chart-seasons').select('.filter').text("");
+
+  //display season name on reset instead of number
+  if (d3.select('#chart-seasons').select('.filter').text()) {
+    console.log('here')
+    //d3.select('#chart-seasons').select('.filter').text(seasons[seasonsChart.filter()]);
+    d3.select('#chart-seasons').select('.filter').text("");
+  }  
 
   //-----------------------------------
   decadeChart
