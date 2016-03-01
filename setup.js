@@ -118,8 +118,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("19500101"), dateFormat.parse("19510130")))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -238,7 +237,22 @@ function initCrossfilter() {
   }
   AddXAxis(decadeChart, "Count");
 
-}
+  function onresize() {
+    dc.chartRegistry.list().forEach(function(chart) {
+      _bbox = chart.root().node().parentNode.getBoundingClientRect();
+      
+    //__dcFlag__ = 1 is poiChart. Scale it differently.
+    rescaleFactor = (chart.__dcFlag__ === 1) ? .66 : .30;
+
+      dc.renderAll();
+    });
+  };
+            
+  onresize();
+  
+  window.addEventListener('resize', onresize);
+
+} //end initCrossfilter()
 
 //====================================================================
 // Update map markers, list and number of selected
