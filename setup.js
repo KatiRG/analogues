@@ -39,7 +39,6 @@ d3.tsv("analogues_reformat_all_select.json", function(data) {
     d.Corr = +d.Corr;
 
     yr = parseInt(d.dateAnlg.substring(0, 4));
-    
 
          if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
     else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
@@ -54,11 +53,13 @@ d3.tsv("analogues_reformat_all_select.json", function(data) {
     d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
 
     //seasons
-    month = d.dateRef.getMonth();
-         if (month >= 11 && month <= 1) d.Season = 0; //DJF
-    else if (month >= 2 && month <= 4) d.Season = 1; //MAM
-    else if (month >= 5 && month <= 7) d.Season = 2; //JJA
-    else if (month >= 8 && month <= 10) d.Season = 3; //SON
+    month = d.dateRef.getMonth() + 1; //Jan is 0
+    if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
+    else if (month >= 3 && month <= 5) d.Season = 1; //MAM
+    else if (month >= 6 && month <= 8) d.Season = 2; //JJA
+    else if (month >= 9 && month <= 11) d.Season = 3; //SON
+
+    
     
   });  
   points=data;
@@ -174,9 +175,11 @@ function initCrossfilter() {
     })
     .xAxis().tickFormat();
 
-    function getBrushDates() {      
-      poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
-      poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();      
+    function getBrushDates() {
+      if (poiChart.filters().length > 0) { 
+        poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
+        poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
+      }
     }
 
   //-----------------------------------
@@ -320,4 +323,17 @@ function update1() {
   dc.redrawAll();  
   //updateList();
   d3.select("#active").text(filter.groupAll().value());
+}
+
+//====================================================================
+function resetZoom() {    
+    dc.refocusAll();
+    poiChart.filterAll();
+    // corrChart.filterAll();
+    // disChart.filterAll();  
+    
+    //works only in console
+    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush .extent").attr("width", 0))
+    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent"))
+    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent")[0])   
 }
