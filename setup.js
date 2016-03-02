@@ -29,8 +29,8 @@ var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-d3.tsv("analogues_reformat_all_select.json", function(data) {
-//d3.tsv("analogues_reformat_all.json", function(data) {  
+//d3.tsv("analogues_reformat_all_select.json", function(data) {
+d3.tsv("analogues_reformat_all.json", function(data) {  
     
   data.forEach(function (d, idx) {
 
@@ -138,7 +138,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -327,8 +327,18 @@ function update1() {
 
 //====================================================================
 function resetZoom() {    
-    dc.refocusAll();
+    //dc.refocusAll();
+    poiChart.select(".brush rect.extent").attr("width", 0);
+
+    poiChart.focus()
     poiChart.filterAll();
+
+    // console.log("poiChart.brushIsEmpty: ", poiChart.brushIsEmpty()) //lie
+    // console.log("corrChart.brushIsEmpty: ", corrChart.brushIsEmpty()) //lie
+
+    // poi_extent = poiChart.extendBrush();
+    // poiChart.filter(poi_extent); //removes dislpay of reset link
+
     // corrChart.filterAll();
     // disChart.filterAll();  
     
@@ -336,4 +346,8 @@ function resetZoom() {
     //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush .extent").attr("width", 0))
     //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent"))
     //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent")[0])   
+    //console.log("opacity: ", d3.select("#chart-poi").select(".brush rect.extent").style("fill-opacity", 0))
+    //d3.select("#chart-poi").select(".brush rect.extent").attr("width", 0);
+
+    //poiChart.select(".brush rect.extent").attr("width", 0);
 }
