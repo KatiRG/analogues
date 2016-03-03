@@ -7,6 +7,8 @@ var poiGrouping;
 var decadeDimension;
 var decadeGrouping;
 
+var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
+
 var slpDateFormat = d3.time.format('%d-%b-%Y');
 var poiDates = [];
 
@@ -18,21 +20,24 @@ var decadeColours = d3.scale.ordinal()
             "#B1CEF5", "#B1CEF5", "#B1CEF5"]);
 
 var seasonColours = d3.scale.ordinal()
-    .range(["#9DD8D3", "#FFE545", "#A9DB66", "#FFAD5D"]);    
+    .range(["#9DD8D3", "#FFE545", "#A9DB66", "#FFAD5D"]);
 var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
-// fitChart vars
+// vars for scatterPlot (not implemented in this branch)
 var corrRange = [-0.15, 1.0];
 var disRange = [-1500, -250.0];
 var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat_all_select.json", function(data) {
-d3.tsv("analogues_reformat_all.json", function(data) {  
+d3.tsv("analogues_reformat_all_select.json", function(data) {
+//d3.tsv("analogues_reformat_all.json", function(data) {
+  
+  minDate = dateFormat.parse(data[0].dateRef); //first date in file
+  maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
     
-  data.forEach(function (d, idx) {
+  data.forEach(function (d, idx) {  
 
     d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
     d.Dis = +d.Dis;
@@ -63,6 +68,10 @@ d3.tsv("analogues_reformat_all.json", function(data) {
     
   });  
   points=data;
+  console.log("minDate: ", minDate)
+  console.log("maxDate: ", maxDate)  
+  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
+  console.log("fullRange: ", fullRange)
 
   initCrossfilter();
 
@@ -138,7 +147,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20130101"), dateFormat.parse("20131231")))    
+    .filter(dc.filters.RangedFilter(dateFormat.parse("19620101"), dateFormat.parse("19621231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -326,12 +335,27 @@ function update1() {
 }
 
 //====================================================================
-function resetZoom() {    
+function resetChart(thisChart) {
     //dc.refocusAll();
-    poiChart.select(".brush rect.extent").attr("width", 0);
+    //poiChart.select(".brush rect.extent").attr("width", 0);
+    console.log("thisChart: ", thisChart)
 
-    poiChart.focus()
-    poiChart.filterAll();
+    if (thisChart.__dcFlag__ === 1 ) {//POI barChart
+      console.log("poi reset")
+      thisChart.focus()
+      thisChart.filterAll();  
+    } else { //seasons pieChart
+      //clear all three barCharts that get activated by pieChart reset
+      //if they don't have any filters on
+      console.log("pie reset")      
+      if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {
+        console.log("no poi filt")
+        poiChart.filterAll();
+      }
+      if ( (corrChart.filters()[0][1] - corrChart.filters()[0][0]) / (1000*60*60*24) ) corrChart.filterAll();
+      if ( (disChart.filters()[0][1] - disChart.filters()[0][0]) / (1000*60*60*24) ) disChart.filterAll();
+    }
+    
 
     // console.log("poiChart.brushIsEmpty: ", poiChart.brushIsEmpty()) //lie
     // console.log("corrChart.brushIsEmpty: ", corrChart.brushIsEmpty()) //lie

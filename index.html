@@ -21,8 +21,7 @@
   <!--<script src="lib/my_dc.min.js"></script>-->
   <!--<script src="lib/dc.beta26.js"></script>-->
   <script src="lib/my_dc.beta26.js"></script>
-  <!--<link rel="stylesheet" href="lib/dc.min.css" />-->
-  <link rel="stylesheet" href="lib/my_dc.beta26.css" />
+  <link rel="stylesheet" href="lib/dc.min.css" />
 
   <script src="setup.js"></script>
 
@@ -77,7 +76,7 @@
       <div class="row">
         <div class="dc-chart col-md-8" id="chart-poi">
           <div class="dc-chart-title">Period of Interest</div>
-          <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetZoom();" 
+          <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 
              style="display: none;">reset</a>
           <span class="reset" style="display: none;"><span class="filter"></span></span>
           <br>
@@ -85,7 +84,7 @@
 
         <div class="dc-chart col-md-1" id="chart-seasons">
           <div class="dc-chart-title">Season</div>
-          <a class="reset" href="javascript:dc.refocusAll();seasonsChart.filterAll();dc.redrawAll();" 
+          <a class="reset" href="javascript:dc.refocusAll();seasonsChart.filterAll();dc.redrawAll();resetChart(seasonsChart);" 
              style="display: none;">reset</a>
           <span class="reset" style="display: none;"><span class="filter"></span></span>
           <br>
