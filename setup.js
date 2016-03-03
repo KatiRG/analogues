@@ -67,11 +67,8 @@ d3.tsv("analogues_reformat_all_select.json", function(data) {
     
     
   });  
-  points=data;
-  console.log("minDate: ", minDate)
-  console.log("maxDate: ", maxDate)  
-  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
-  console.log("fullRange: ", fullRange)
+  points=data; 
+  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days 
 
   initCrossfilter();
 
@@ -147,7 +144,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("19620101"), dateFormat.parse("19621231")))    
+    //.filter(dc.filters.RangedFilter(dateFormat.parse("19620101"), dateFormat.parse("19621231")))    
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -205,23 +202,23 @@ function initCrossfilter() {
       return seasons[d.key];
     })
     .title(function(d) {
-      return seasons[d.key];
+      return seasons[d.key] +": "+ d.value +" analogues";
     })
     .valueAccessor(function(d) {      
       if (d.value != 0) return 0.25;
     });
     // .renderlet(function (chart) {
-    //   chart.selectAll("g").attr("transform", "translate(36, 22)");      
+    //   chart.selectAll("g").attr("transform", "translate(36, 22)");
     // });
+  
+  //DOESN'T WORK
+  // //display season name on reset instead of number
+  // if (d3.select('#chart-seasons').select('.filter').text()) {
+  //   console.log('here')
+  //   //d3.select('#chart-seasons').select('.filter').text(seasons[seasonsChart.filter()]);
+  //   d3.select('#chart-seasons').select('.filter').text("");
+  // }
 
-  d3.select('#chart-seasons').select('.filter').text("");
-
-  //display season name on reset instead of number
-  if (d3.select('#chart-seasons').select('.filter').text()) {
-    console.log('here')
-    //d3.select('#chart-seasons').select('.filter').text(seasons[seasonsChart.filter()]);
-    d3.select('#chart-seasons').select('.filter').text("");
-  }  
 
   //-----------------------------------
   decadeChart
@@ -340,20 +337,19 @@ function resetChart(thisChart) {
     //poiChart.select(".brush rect.extent").attr("width", 0);
     console.log("thisChart: ", thisChart)
 
-    if (thisChart.__dcFlag__ === 1 ) {//POI barChart
-      console.log("poi reset")
+    if (thisChart.__dcFlag__ === 1 ) {//POI barChart     
       thisChart.focus()
       thisChart.filterAll();  
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
       //if they don't have any filters on
       console.log("pie reset")      
-      if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {
-        console.log("no poi filt")
-        poiChart.filterAll();
-      }
-      if ( (corrChart.filters()[0][1] - corrChart.filters()[0][0]) / (1000*60*60*24) ) corrChart.filterAll();
-      if ( (disChart.filters()[0][1] - disChart.filters()[0][0]) / (1000*60*60*24) ) disChart.filterAll();
+      // if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {      
+      //   poiChart.filterAll();
+      // }
+      poiChart.filterAll();
+      corrChart.filterAll();
+      disChart.filterAll();
     }
     
 
