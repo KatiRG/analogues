@@ -31,8 +31,8 @@ var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-d3.tsv("analogues_reformat_all_select.json", function(data) {
-//d3.tsv("analogues_reformat_all.json", function(data) {
+//d3.tsv("analogues_reformat_all_select.json", function(data) {
+d3.tsv("analogues_reformat_all.json", function(data) {
   
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
@@ -203,10 +203,10 @@ function initCrossfilter() {
     })
     .title(function(d) {
       return seasons[d.key] +": "+ d.value +" analogues";
-    })
-    .valueAccessor(function(d) {      
-      if (d.value != 0) return 0.25;
     });
+    // .valueAccessor(function(d) {      
+    //   if (d.value != 0) return 0.25;
+    // });
     // .renderlet(function (chart) {
     //   chart.selectAll("g").attr("transform", "translate(36, 22)");
     // });
@@ -240,7 +240,7 @@ function initCrossfilter() {
     .width(380)
     .height(200)
     .margins({top: 10, right: 20, bottom: 30, left: 40})  
-    .centerBar(false)
+    .centerBar(true)
     .elasticY(true)
     .dimension(corrDimension)
     .group(corrGrouping)
@@ -263,7 +263,7 @@ function initCrossfilter() {
     .width(380)
     .height(200)
     .margins({top: 10, right: 20, bottom: 30, left: 40})  
-    .centerBar(false)
+    .centerBar(true)
     .elasticY(true)
     .dimension(disDimension)
     .group(disGrouping)
