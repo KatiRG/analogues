@@ -3,76 +3,93 @@
 <!--
  ##########################################################################
  Patrick.Brockmann@lsce.ipsl.fr
+ Cathy.Nangini@lsce.ipsl.fr
  PLEASE DO NOT COPY OR DISTRIBUTE WITHOUT PERMISSION
  ##########################################################################
 -->
-  <head>
-    <meta charset="utf-8">
-    <title>Climate Proxies Finder</title>
-    <link href="style.css" rel="stylesheet" type="text/css" media="all">
 
-    <script src="lib/jquery-1.10.2.min.js"></script>
-    <link href="lib/bootstrap-3.0.2-dist/css/bootstrap.css" rel="stylesheet">
-    <script src="lib/bootstrap-3.0.2-dist/js/bootstrap.min.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>Analogues Viewer</title>
+  <link href="style.css" rel="stylesheet" type="text/css" media="all">
 
-    <!-- Custom styles for this template -->
-    <link href="sticky-footer-navbar.css" rel="stylesheet">
+  <script src="lib/jquery-1.12.0.min.js"></script>
+  <script src="lib/bootstrap.min.js"></script>
+  <link href="lib/bootstrap.min.css" rel="stylesheet">
 
-  </head>
+  <!-- Custom styles for this template -->
+  <link href="sticky-footer-navbar.css" rel="stylesheet">
+</head>
 
-  <body>
+<body>
 
-    <div id="wrap">
+  <div id="wrap">
 
-      <!-- Fixed navbar -->
-      <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="container">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="index.html">Climate Proxies Finder</a>
-          </div>
-          <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav">
-              <li><a href="help.html">Help</a></li>
-              <li><a href="contact.html">Contact</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" style="color: #ccc;">Analogues Viewer</a>          
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="help.html">Help</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container -->
+    </div><!--/.navbar -->
+
+    <!-- Begin page content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-md-5">
+          <b><p>Project Coordinator: </b><br>
+          <A HREF="mailto:Pascal.Yiou@lsce.ipsl.fr">Pascal Yiou</A></br>
+          The project is coordinated by Pascal Yiou (CEA). He is assisted by John Bazire (CEA, project manager).
+          <br><br>
         </div>
       </div>
 
-      <!-- Begin page content -->
-      <div class="container">
-      	<div class="row">
-              <div class="col-md-4">
-		<b><p>Director of project : </b><A HREF="mailto:Valerie.Masson@lsce.ipsl.fr">Valérie Masson-Delmotte</A></br>
-Senior scientist (research director) at LSCE/DRF/CEA, head of the "Climate dynamics and archives" group of LSCE.<br>
-Research interests: Paleoclimate reconstructions from stable isotopes in ice cores and tree rings, relationships between water stable isotopes and climate, evaluation of climate models, mechanisms of climate variability.
-              </div>
-              <div class="col-md-4">
-		<b><p>Data gathering and processing: </b><A HREF="mailto:Timothe.Bolliet@lsce.ipsl.fr">Timothe Bolliet</A></br>
-Post-Doctorant at LSCE.<br>
-Research interests: Reconstructions of past climate conditions derived from paleoclimatology proxies.
-              </div>
-              <div class="col-md-4">
-		<b><p>Data and web engineering : </b><A HREF="mailto:Patrick.Brockmann@lsce.ipsl.fr">Patrick Brockmann</A></br>
-Data scientist at LSCE/DRF/CEA, member of the "CalculS" group of LSCE.<br>
-Research interests: Data analysis and visualization, geo-spatial web applications, geo-services architectures and data processing in high performance computing environments. 
-              </div>
+      <div class="row">
+        <div class="col-md-5">
+          <b><p>Permanent Researchers: </b><br> 
+          <A HREF="mailto:Mathieu.Vrac@lsce.ipsl.fr">Mathieu Vrac</A> (CNRS, leader of ESTIMR team) <br>
+          Expertise: statistical downscaling.</br>
+
+          <p><A HREF="mailto:Philippe.Naveau@lsce.ipsl.fr">Philippe Naveau</A> (CNRS)</br>
+          Expertise: extreme value theory.</br>
+
+          <p><A HREF="mailto:Robert.Vautard@lsce.ipsl.fr">Robert Vautard</A> (CNRS) </br>
+          Expertise: dynamical downscaling and climate modelling.</br></br>
         </div>
-      </div><!-- /.container -->
+      </div>
 
-    </div>
+      <div class="row">
+        <div class="col-md-5">
+          <b><p>Data and web engineering: </b><br>
+          <A HREF="mailto:Cathy.Nangini@lsce.ipsl.fr">Cathy Nangini</A> (LSCE/CNRS)</br>
+          Expertise: Data analysis and visualization.</br></br>
 
-    <div id="footer">
-       <div class="container">
-		<p class="text-muted credit">Realised by <a target="_blank" href="http://www.lsce.ipsl.fr/en"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span></a>&nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en"><img src="LSCE_Icon.png" title="Climate and Environment Sciences Laboratory"/></a> and hosted by <a target="_blank" href="http://www.ipsl.fr/en"><span title="Institut Pierre Simon Laplace" style="font-weight:bold;">IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en"><img src="IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 1.4 - 2016/02/08</p>
-      </div><!-- /.container -->
-    </div>
+          <A HREF="mailto:Patrick.Brockmann@lsce.ipsl.fr">Patrick Brockmann</A> (LSCE/DRF/CEA)</br>
+          Expertise: Data analysis and visualization, geo-spatial web applications, geo-services architectures and data processing in high performance computing environments. 
+        </div>
+      </div>
+    
+    </div><!-- /.container -->
+    
+  </div><!--/.wrap -->
 
-  </body>
+  <div id="footer">
+    <div class="container">
+		  <p class="text-muted credit">Created by <a target="_blank" href="http://www.lsce.ipsl.fr/en"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span></a>&nbsp;<a target="_blank" href="http://www.lsce.ipsl.fr/en"><img src="LSCE_Icon.png" title="Climate and Environment Sciences Laboratory"/></a> and hosted by <a target="_blank" href="http://www.ipsl.fr/en"><span title="Institut Pierre Simon Laplace" style="font-weight:bold;">IPSL</span></a>&nbsp;<a target="_blank" href="http://www.ipsl.fr/en"><img src="IPSL_logo.png" title="Institut Pierre Simon Laplace"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2016/02/15</p>
+    </div><!-- /.container -->
+  </div>
+
+</body>
 </html>
