@@ -24,13 +24,16 @@
   fill: #333;
 }
 
-#chart-depth .foreground.bar {
-  fill: #2EA3DB;
+/*seasons pie chart*/
+.dc-chart .pie-slice {
+    fill: black;
+    font-size: 10px;    
 }
 
-#chart-age .foreground.bar {
-  fill: #F5B441;
-}
+/*#chart-seasons {
+  transform: translate(-50px,-20px);
+  svg { width: 450px; }
+}*/
 
 .axis path, .axis line {
   fill: none;
