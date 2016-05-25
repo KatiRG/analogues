@@ -9,3 +9,27 @@ slpano-NA : {sea level pressure North Atlanic}
 corrnk : {corrnk vs rms is the detection methode}
 
 all1948 : {period to look at}
+
+www-lscedods.cea.fr/estimr/A2C2/Analogs/slpano-NA.analog30rms.1d.all1948-2015.dat
+
+Look for file here:
+/home/estimr1/dods/A2C2/Analogs/
+
+Analogue files available directly from Pascal Yiou's directory
+--------------------------------------------------------------
+
+Les fichiers d'analogues se trouvent dans:
+/home/estimr1/yiou/estimr1/NCEP/slpano-NA.analog30rms.1d.all1948-2016.dat
+/home/estimr1/yiou/estimr1/NCEP/slpano-NA.analog30rms.3d.all1948-2016.dat
+
+Le premier calcule des analogues pour chaque jour séparément. Le second
+pour des séquences de 3 jours consécutifs.
+
+Sabine fait le même genre de calcul automatique, avec un résultat stocké
+sur estimr2 (mais pas encore sur le dods). Le programme en FORTRAN de
+Sabine est celui qui sera utilisé par le birdhouse de Nils.
+
+For up to 2015 only:
+slpano-NA.analog30rms.1d.all1948-2015.dat
+
+Note that the last day is 20151225 and NOT 20151231 because the file is calculated each sunday, and 20151225 is the last sunday that falls in december.

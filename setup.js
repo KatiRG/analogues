@@ -25,14 +25,14 @@ var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
 // vars for scatterPlot (not implemented in this branch)
-var corrRange = [-0.15, 1.0];
-var disRange = [-1500, -250.0];
+var corrRange = [-0.08, 1.0];
+var disRange = [280, 1400];
 var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat_all_select.json", function(data) {
-d3.tsv("analogues_reformat_all.json", function(data) {
+//d3.tsv("analogues_19480101_20151225.json", function(data) {
+d3.tsv("analogues_19480101_20160520.json", function(data) {  
   
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
@@ -52,20 +52,19 @@ d3.tsv("analogues_reformat_all.json", function(data) {
     else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
     else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
     else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
+    else if (yr == 2016) d.dateAnlg = "2016";
     
     //bin correlation and distance
     d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
     d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
 
     //seasons
-    month = d.dateRef.getMonth() + 1; //Jan is 0
+    month = d.dateRef.getMonth() + 1; //Jan is 0    
     if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
     else if (month >= 3 && month <= 5) d.Season = 1; //MAM
     else if (month >= 6 && month <= 8) d.Season = 2; //JJA
     else if (month >= 9 && month <= 11) d.Season = 3; //SON
-
-    
-    
+ 
   });  
   points=data; 
   fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days 
@@ -99,7 +98,7 @@ function initCrossfilter() {
   });
 
   //-----------------------------------  
-  seasonDimension = filter.dimension(function(d) {    
+  seasonDimension = filter.dimension(function(d) {
     return d.Season;
   });
   seasonGrouping = seasonDimension.group();
@@ -111,13 +110,13 @@ function initCrossfilter() {
   decadeGrouping = decadeDimension.group();
 
   //-----------------------------------  
-  corrDimension = filter.dimension(function(d) {    
+  corrDimension = filter.dimension(function(d) {
     return d.Corr;
   });
   corrGrouping = corrDimension.group();
 
   //-----------------------------------  
-  disDimension = filter.dimension(function(d) {    
+  disDimension = filter.dimension(function(d) {
     return d.Dis;
   });
   disGrouping = disDimension.group();
