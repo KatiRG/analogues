@@ -74,17 +74,20 @@
         <div id="totals"><span id="active">-</span> of <span id="total">-</span> analogues selected
           <br><br>
         </div>
-
       </div>
 
 
-      <div class="row">                
-        <div class="dc-chart-title">Period of Interest (manual selection, format YYYMMDD)</div><br>
-        <p>
-          Start Date: <input type="text" id="datepicker0">
-          End Date: <input type="text" id="datepicker1"></p>
-        <p> 
+      <div class="row">
+        <div class="dc-chart col-md-8">
+          <div class="dc-chart-title">Period of Interest (manual selection, format dd/mm/yyyy)</div><br>
+          <p>
+            Start Date: <input type="text" id="datepicker0">
+            End Date: <input type="text" id="datepicker1"></p>
+          <p>
+        </div>
+      </div>  
 
+      <div class="row">
         <div class="dc-chart col-md-8" id="chart-poi">
           <div class="dc-chart-title">Period of Interest (chart selection)</div>
           <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 

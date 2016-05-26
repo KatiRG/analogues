@@ -151,26 +151,28 @@ function initCrossfilter() {
   $(function() {
     $("#datepicker0").datepicker({
       numberOfMonths: 3,
-      showButtonPanel: true
-    });
+      showButtonPanel: true,
+      dateFormat: "dd/mm/yy"
+    });    
   });
 
   $(function() {
     $("#datepicker1").datepicker({
       numberOfMonths: 3,
-      showButtonPanel: true
+      showButtonPanel: true,
+      dateFormat: "dd/mm/yy"
     });
   });
 
   $("#datepicker0").on('change', function() {
     var dateRaw = $("#datepicker0").val().split("/");
-    poiDates_manual[0] = new Date(dateRaw[2], dateRaw[0] - 1, dateRaw[1]);
+    poiDates_manual[0] = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
     useManualDates(poiDates_manual);
   });
 
   $("#datepicker1").on('change', function() {
     var dateRaw = $("#datepicker1").val().split("/");
-    poiDates_manual[1] = new Date(dateRaw[2], dateRaw[0] - 1, dateRaw[1]);
+    poiDates_manual[1] = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
     useManualDates(poiDates_manual);
   });
 
