@@ -148,7 +148,8 @@ function initCrossfilter() {
 
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
-  $(function() {
+  $(function() {    
+    $("#datepicker0").val(''); //clear after page reload
     $("#datepicker0").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
@@ -157,6 +158,7 @@ function initCrossfilter() {
   });
 
   $(function() {
+    $("#datepicker1").val(''); //clear after page reload
     $("#datepicker1").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
