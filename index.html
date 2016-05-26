@@ -74,8 +74,24 @@
 
 
       <div class="row">
+        <p>
+          <!--http://bl.ocks.org/d3noob/10633704-->
+           <div class="dc-chart-title">Period of Interest (manual selection, format YYYMMDD)</div><br>
+            <label for="nValue0" class="dc-chart-title"
+                   style="display: inline-block; width: 240px; text-align: right">
+                   start (&ge; 19480101):
+            </label>
+            <input  id="nValue0" min="19480101" max="19600520" type="number">
+
+             <label for="nValue1" class="dc-chart-title"
+                   style="display: inline-block; width: 140px; text-align: right">
+                   end (&le; 20160520): <span id="nValue-value1"></span>
+            </label>
+            <input id="nValue1" min="19480101" max="19600520" type="number">
+        </p>
+
         <div class="dc-chart col-md-8" id="chart-poi">
-          <div class="dc-chart-title">Period of Interest</div>
+          <div class="dc-chart-title">Period of Interest (chart selection)</div>
           <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 
              style="display: none;">reset</a>
           <span class="reset" style="display: none;"><span class="filter"></span></span>

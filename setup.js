@@ -1,6 +1,6 @@
 
 //====================================================================
-
+//Global vars
 var filter;
 var poiDimension;
 var poiGrouping;
@@ -11,6 +11,7 @@ var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filter
 
 var slpDateFormat = d3.time.format('%d-%b-%Y');
 var poiDates = [];
+var poiDates_manual = []; //filled by input date boxes
 
 var dateFormat = d3.time.format('%Y%m%d');
 
@@ -32,7 +33,8 @@ var corrBinWidth = 0.1, disBinWidth = 100.;
 function init() {
 
 //d3.tsv("analogues_19480101_20151225.json", function(data) {
-d3.tsv("analogues_19480101_20160520.json", function(data) {  
+//d3.tsv("analogues_19480101_20160520.json", function(data) {
+d3.tsv("analogues_select.json", function(data) {  
   
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
@@ -67,7 +69,7 @@ d3.tsv("analogues_19480101_20160520.json", function(data) {
  
   });  
   points=data; 
-  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days 
+  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
 
   initCrossfilter();
 
@@ -93,7 +95,7 @@ function initCrossfilter() {
     return d.dateRef; //resolves to the day    
   });
   poiDayGrouping = poiDimension.group();
-  poiGrouping = poiDimension.group(function(d) {
+  poiGrouping = poiDimension.group(function(d) {    
     return d3.time.month(d); //resolves to the month
   });
 
@@ -127,6 +129,57 @@ function initCrossfilter() {
   decadeChart  = dc.rowChart("#chart-decade");
   corrChart = dc.barChart("#chart-corr");
   disChart = dc.barChart("#chart-dis");
+
+  //-----------------------------------
+  //Manual date selection
+  d3.select("#nValue0").on("input", function() {
+    //update(+this.value);        
+    poiDates_manual[0] = +this.value;
+    useManualDates(poiDates_manual);
+  });
+
+  d3.select("#nValue1").on("input", function() {
+    //update(+this.value);    
+    poiDates_manual[1] = +this.value;
+    useManualDates(poiDates_manual);
+  });
+
+  function useManualDates(poiDates_manual) {
+    if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
+      console.log("poiDates_manual ALL: ", poiDates_manual)
+      var poiDateObj = [];
+      poiDateObj[0] = toDateObj(poiDates_manual[0]);
+      poiDateObj[1] = toDateObj(poiDates_manual[1]);
+
+      
+      console.log("poiDateObj: ", poiDateObj)
+
+      //poiDimension.filterAll();
+      poiDimension.filter(poiDateObj);
+      //dc.renderAll();
+      dc.redrawAll();
+
+      //Reset poiDate chart filter
+      // poiDimension.filterAll();
+      // poiDimension.filter(poiDateObj);
+      // dc.redrawAll();
+    } else {
+      console.log("poiDates_manual incomplete: ", poiDates_manual)
+
+    }
+
+  }
+
+  function toDateObj(dateNum) {  
+
+    y = dateNum.toString().slice(0,4);
+    m = dateNum.toString().slice(4,6);
+    d = dateNum.toString().slice(6,8);
+
+    var poiDateObj = new Date(Number(y),Number(m) - 1,Number(d));
+    console.log("poiDateObj in fn: ", poiDateObj)
+    return poiDateObj;
+  }
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
@@ -181,6 +234,7 @@ function initCrossfilter() {
     .xAxis().tickFormat();
 
     function getBrushDates() {
+      console.log("poiChart.filters().length: ", poiChart.filters().length)
       if (poiChart.filters().length > 0) { 
         poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
         poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
