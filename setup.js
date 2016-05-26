@@ -144,12 +144,15 @@ function initCrossfilter() {
 // you could go further on the change event and zoom in on the charts with something like:
 
 // dc.chartRegistry.list(chartGroup).filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
-
+  
+  //Disable datepicker is poiChart filters are used
+  //if (poiChart.filter()) console.log("yes"); else console.log("no")
+  //$("#datepicker0").prop('disabled', true)
 
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
   $(function() {    
-    $("#datepicker0").val(''); //clear after page reload
+    $("#datepicker0").val("").prop('disabled', false); //clear after page reload
     $("#datepicker0").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
@@ -158,7 +161,7 @@ function initCrossfilter() {
   });
 
   $(function() {
-    $("#datepicker1").val(''); //clear after page reload
+    $("#datepicker1").val("").prop('disabled', false); //clear after page reload
     $("#datepicker1").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
@@ -211,7 +214,7 @@ function initCrossfilter() {
     .elasticX(false)
     .renderHorizontalGridLines(true)
     .on("filtered", getBrushDates)
-    .on('zoomed', function(chart, filter) {
+    .on('zoomed', function(chart, filter) {      
 
       deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
 
@@ -241,6 +244,8 @@ function initCrossfilter() {
 
     function getBrushDates() {
       if (poiChart.filters().length > 0) {
+        $("#datepicker0").val("").prop('disabled', true);
+        $("#datepicker1").val("").prop('disabled', true);
         poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
         poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
       }
@@ -391,13 +396,15 @@ function update1() {
 
 //====================================================================
 function resetChart(thisChart) {
-    //dc.refocusAll();
-    //poiChart.select(".brush rect.extent").attr("width", 0);
-    console.log("thisChart: ", thisChart)
 
-    if (thisChart.__dcFlag__ === 1 ) {//POI barChart     
+    if (thisChart.__dcFlag__ === 1 ) {//POI barChart      
       thisChart.focus()
-      thisChart.filterAll();  
+      thisChart.filterAll();
+
+      //Re-activate datepicker text inputs
+      $("#datepicker0").prop('disabled', false);
+      $("#datepicker1").prop('disabled', false);
+
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
       //if they don't have any filters on
