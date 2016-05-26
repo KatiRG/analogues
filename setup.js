@@ -132,53 +132,55 @@ function initCrossfilter() {
 
   //-----------------------------------
   //Manual date selection
-  d3.select("#nValue0").on("input", function() {
-    //update(+this.value);        
-    poiDates_manual[0] = +this.value;
+  // dcjs Gitter nordfjord Feb 17, 2015
+//   let dateDim = cf.dimension(d => d3.time.day(dateAccessor(d)));
+
+// datepicker.on('change', (range)=> { // or equivolent event
+//     dateDim.filterRange(range);
+//     dc.chartRegistry.list(chartGroup).forEach(c => c.redraw());
+// });
+// you could go further on the change event and zoom in on the charts with something like:
+
+// you could go further on the change event and zoom in on the charts with something like:
+
+// dc.chartRegistry.list(chartGroup).filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
+
+
+  //Datepicker
+  //https://jqueryui.com/datepicker/#multiple-calendars
+  $(function() {
+    $("#datepicker0").datepicker({
+      numberOfMonths: 3,
+      showButtonPanel: true
+    });
+  });
+
+  $(function() {
+    $("#datepicker1").datepicker({
+      numberOfMonths: 3,
+      showButtonPanel: true
+    });
+  });
+
+  $("#datepicker0").on('change', function() {
+    var dateRaw = $("#datepicker0").val().split("/");
+    poiDates_manual[0] = new Date(dateRaw[2], dateRaw[0] - 1, dateRaw[1]);
     useManualDates(poiDates_manual);
   });
 
-  d3.select("#nValue1").on("input", function() {
-    //update(+this.value);    
-    poiDates_manual[1] = +this.value;
+  $("#datepicker1").on('change', function() {
+    var dateRaw = $("#datepicker1").val().split("/");
+    poiDates_manual[1] = new Date(dateRaw[2], dateRaw[0] - 1, dateRaw[1]);
     useManualDates(poiDates_manual);
   });
 
   function useManualDates(poiDates_manual) {
+
     if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
-      console.log("poiDates_manual ALL: ", poiDates_manual)
-      var poiDateObj = [];
-      poiDateObj[0] = toDateObj(poiDates_manual[0]);
-      poiDateObj[1] = toDateObj(poiDates_manual[1]);
-
-      
-      console.log("poiDateObj: ", poiDateObj)
-
-      //poiDimension.filterAll();
-      poiDimension.filter(poiDateObj);
-      //dc.renderAll();
-      dc.redrawAll();
-
       //Reset poiDate chart filter
-      // poiDimension.filterAll();
-      // poiDimension.filter(poiDateObj);
-      // dc.redrawAll();
-    } else {
-      console.log("poiDates_manual incomplete: ", poiDates_manual)
-
+      poiDimension.filter(poiDates_manual);
+      dc.redrawAll();
     }
-
-  }
-
-  function toDateObj(dateNum) {  
-
-    y = dateNum.toString().slice(0,4);
-    m = dateNum.toString().slice(4,6);
-    d = dateNum.toString().slice(6,8);
-
-    var poiDateObj = new Date(Number(y),Number(m) - 1,Number(d));
-    console.log("poiDateObj in fn: ", poiDateObj)
-    return poiDateObj;
   }
 
   //-----------------------------------
@@ -234,8 +236,7 @@ function initCrossfilter() {
     .xAxis().tickFormat();
 
     function getBrushDates() {
-      console.log("poiChart.filters().length: ", poiChart.filters().length)
-      if (poiChart.filters().length > 0) { 
+      if (poiChart.filters().length > 0) {
         poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
         poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
       }
