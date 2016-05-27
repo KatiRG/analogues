@@ -74,10 +74,6 @@ d3.tsv("analogues_19480101_20160520.json", function(data) {
 
   initCrossfilter();
 
-  // Render the total.
-  d3.selectAll("#total")
-    .text(filter.size());
-
   update1();
   
 });
@@ -206,7 +202,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("19620101"), dateFormat.parse("19621231")))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20150101"), dateFormat.parse("20151231")))
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -310,7 +306,7 @@ function initCrossfilter() {
     .elasticY(true)
     .dimension(corrDimension)
     .group(corrGrouping)
-    .on("preRedraw",update0)
+    //.on("preRedraw",update0)
     .x(d3.scale.linear().domain(corrRange))
     .xUnits(dc.units.fp.precision(corrBinWidth))
     //.round(function(d) {return corrBinWidth*Math.floor(d/corrBinWidth)})
@@ -333,7 +329,7 @@ function initCrossfilter() {
     .elasticY(true)
     .dimension(disDimension)
     .group(disGrouping)
-    .on("preRedraw",update0)
+    //.on("preRedraw",update0)
     .x(d3.scale.linear().domain(disRange))
     .xUnits(dc.units.fp.precision(disBinWidth))
     //.round(function(d) {return disBinWidth*Math.floor(d/disBinWidth)})
@@ -346,6 +342,18 @@ function initCrossfilter() {
   xAxis_disChart.ticks(6).tickFormat(d3.format("d"));
   yAxis_disChart = disChart.yAxis();
   yAxis_disChart.tickFormat(d3.format(",.2s")).tickSubdivide(0);
+
+  //-----------------------------------
+  dataCount = dc.dataCount('#chart-count');
+
+  dataCount 
+    .dimension(filter)
+    .group(filter.groupAll())
+    .html({
+    some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+          ' | <a href=\'javascript: resetAll();\'>Reset All</a>',
+          all: 'All records selected. Please click on the graph to apply filters.'
+    });
 
   //-----------------------------------
   dc.renderAll();
@@ -383,18 +391,23 @@ function initCrossfilter() {
 } //end initCrossfilter()
 
 //====================================================================
-// Update map markers, list and number of selected
-function update0() {  
-  //updateList();
-  d3.select("#active").text(filter.groupAll().value());
+// Update dc charts, map markers, list and number of selected
+function update1() {
+  dc.redrawAll();
 }
 
 //====================================================================
-// Update dc charts, map markers, list and number of selected
-function update1() {
-  dc.redrawAll();  
-  //updateList();
-  d3.select("#active").text(filter.groupAll().value());
+// Reset all
+function resetAll() {
+  $("#datepicker0").val("").prop("disabled", false);
+  $("#datepicker1").val("").prop("disabled", false);
+
+  poiChart.filterAll(); 
+  seasonsChart.filterAll();
+  decadeChart.filterAll();
+  corrChart.filterAll();
+  disChart.filterAll();
+  dc.redrawAll();
 }
 
 //====================================================================
