@@ -182,6 +182,7 @@ function initCrossfilter() {
   });
 
   function useManualDates(poiDates_manual) {
+    d3.select("#dateReset").style("display", "block");
 
     if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
       //Reset poiDate chart filter
@@ -246,6 +247,8 @@ function initCrossfilter() {
       if (poiChart.filters().length > 0) {
         $("#datepicker0").val("").prop('disabled', true);
         $("#datepicker1").val("").prop('disabled', true);
+        d3.select("#dateReset").style("display", "none");
+
         poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
         poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
       }
@@ -395,20 +398,21 @@ function update1() {
 }
 
 //====================================================================
-function resetChart(thisChart) {
+function resetChart(thisChart) {  
 
-    if (thisChart.__dcFlag__ === 1 ) {//POI barChart      
+    if (thisChart.__dcFlag__ === 1 ) {//POI barChart
       thisChart.focus()
       thisChart.filterAll();
 
       //Re-activate datepicker text inputs
       $("#datepicker0").prop('disabled', false);
       $("#datepicker1").prop('disabled', false);
+      d3.select("#dateReset").style("display", "none");
 
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
       //if they don't have any filters on
-      console.log("pie reset")      
+      console.log("pie reset")
       // if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {      
       //   poiChart.filterAll();
       // }
