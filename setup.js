@@ -12,6 +12,7 @@ var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filter
 var slpDateFormat = d3.time.format('%d-%b-%Y');
 var poiDates = [];
 var poiDates_manual = []; //filled by input date boxes
+var day = 60 * 60 * 24 * 1000; //day in milliseconds
 
 var dateFormat = d3.time.format('%Y%m%d');
 
@@ -33,8 +34,8 @@ var corrBinWidth = 0.1, disBinWidth = 100.;
 function init() {
 
 //d3.tsv("analogues_19480101_20151225.json", function(data) {
-//d3.tsv("analogues_19480101_20160520.json", function(data) {
-d3.tsv("analogues_select.json", function(data) {  
+d3.tsv("analogues_19480101_20160520.json", function(data) {
+//d3.tsv("analogues_select.json", function(data) {  
   
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
@@ -132,23 +133,18 @@ function initCrossfilter() {
 
   //-----------------------------------
   //Manual date selection
-  // dcjs Gitter nordfjord Feb 17, 2015
-//   let dateDim = cf.dimension(d => d3.time.day(dateAccessor(d)));
-
-// datepicker.on('change', (range)=> { // or equivolent event
-//     dateDim.filterRange(range);
-//     dc.chartRegistry.list(chartGroup).forEach(c => c.redraw());
-// });
-// you could go further on the change event and zoom in on the charts with something like:
-
-// you could go further on the change event and zoom in on the charts with something like:
-
-// dc.chartRegistry.list(chartGroup).filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
-  
-  //Disable datepicker is poiChart filters are used
-  //if (poiChart.filter()) console.log("yes"); else console.log("no")
-  //$("#datepicker0").prop('disabled', true)
-
+  //dcjs Gitter nordfjord Feb 17, 2015
+  //let dateDim = cf.dimension(d => d3.time.day(dateAccessor(d)));
+  //
+  //datepicker.on('change', (range)=> { // or equivolent event
+  //  dateDim.filterRange(range);
+  //  dc.chartRegistry.list(chartGroup).forEach(c => c.redraw());
+  //});
+  //You could go further on the change event and zoom in on the charts with something like:
+  //
+  //dc.chartRegistry.list(chartGroup)
+  //  .filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
+    
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
   $(function() {    
@@ -170,14 +166,18 @@ function initCrossfilter() {
   });
 
   $("#datepicker0").on('change', function() {
-    var dateRaw = $("#datepicker0").val().split("/");
-    poiDates_manual[0] = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    var dateRaw = $("#datepicker0").val().split("/");    
+    var dateString = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    //shift forward one day
+    poiDates_manual[0] = new Date(dateString.getTime() + day);
     useManualDates(poiDates_manual);
   });
 
   $("#datepicker1").on('change', function() {
     var dateRaw = $("#datepicker1").val().split("/");
-    poiDates_manual[1] = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    var dateString = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    //shift forward one day
+    poiDates_manual[1] = new Date(dateString.getTime() + day);
     useManualDates(poiDates_manual);
   });
 
