@@ -1,6 +1,6 @@
 
 //====================================================================
-
+//Global vars
 var filter;
 var poiDimension;
 var poiGrouping;
@@ -11,6 +11,8 @@ var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filter
 
 var slpDateFormat = d3.time.format('%d-%b-%Y');
 var poiDates = [];
+var poiDates_manual = []; //filled by input date boxes
+var day = 60 * 60 * 24 * 1000; //day in milliseconds
 
 var dateFormat = d3.time.format('%Y%m%d');
 
@@ -25,14 +27,15 @@ var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
 // vars for scatterPlot (not implemented in this branch)
-var corrRange = [-0.15, 1.0];
-var disRange = [-1500, -250.0];
+var corrRange = [-0.08, 1.0];
+var disRange = [280, 1400];
 var corrBinWidth = 0.1, disBinWidth = 100.;
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_reformat_all_select.json", function(data) {
-d3.tsv("analogues_reformat_all.json", function(data) {
+//d3.tsv("analogues_19480101_20151225.json", function(data) {
+d3.tsv("analogues_19480101_20160520.json", function(data) {
+//d3.tsv("analogues_select.json", function(data) {  
   
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
@@ -52,29 +55,24 @@ d3.tsv("analogues_reformat_all.json", function(data) {
     else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
     else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
     else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
+    else if (yr == 2016) d.dateAnlg = "2016";
     
     //bin correlation and distance
     d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
     d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
 
     //seasons
-    month = d.dateRef.getMonth() + 1; //Jan is 0
+    month = d.dateRef.getMonth() + 1; //Jan is 0    
     if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
     else if (month >= 3 && month <= 5) d.Season = 1; //MAM
     else if (month >= 6 && month <= 8) d.Season = 2; //JJA
     else if (month >= 9 && month <= 11) d.Season = 3; //SON
-
-    
-    
+ 
   });  
   points=data; 
-  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days 
+  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
 
   initCrossfilter();
-
-  // Render the total.
-  d3.selectAll("#total")
-    .text(filter.size());
 
   update1();
   
@@ -94,12 +92,12 @@ function initCrossfilter() {
     return d.dateRef; //resolves to the day    
   });
   poiDayGrouping = poiDimension.group();
-  poiGrouping = poiDimension.group(function(d) {
+  poiGrouping = poiDimension.group(function(d) {    
     return d3.time.month(d); //resolves to the month
   });
 
   //-----------------------------------  
-  seasonDimension = filter.dimension(function(d) {    
+  seasonDimension = filter.dimension(function(d) {
     return d.Season;
   });
   seasonGrouping = seasonDimension.group();
@@ -111,13 +109,13 @@ function initCrossfilter() {
   decadeGrouping = decadeDimension.group();
 
   //-----------------------------------  
-  corrDimension = filter.dimension(function(d) {    
+  corrDimension = filter.dimension(function(d) {
     return d.Corr;
   });
   corrGrouping = corrDimension.group();
 
   //-----------------------------------  
-  disDimension = filter.dimension(function(d) {    
+  disDimension = filter.dimension(function(d) {
     return d.Dis;
   });
   disGrouping = disDimension.group();
@@ -128,6 +126,66 @@ function initCrossfilter() {
   decadeChart  = dc.rowChart("#chart-decade");
   corrChart = dc.barChart("#chart-corr");
   disChart = dc.barChart("#chart-dis");
+
+  //-----------------------------------
+  //Manual date selection
+  //dcjs Gitter nordfjord Feb 17, 2015
+  //let dateDim = cf.dimension(d => d3.time.day(dateAccessor(d)));
+  //
+  //datepicker.on('change', (range)=> { // or equivolent event
+  //  dateDim.filterRange(range);
+  //  dc.chartRegistry.list(chartGroup).forEach(c => c.redraw());
+  //});
+  //You could go further on the change event and zoom in on the charts with something like:
+  //
+  //dc.chartRegistry.list(chartGroup)
+  //  .filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
+    
+  //Datepicker
+  //https://jqueryui.com/datepicker/#multiple-calendars
+  $(function() {    
+    $("#datepicker0").val("").prop('disabled', false); //clear after page reload
+    $("#datepicker0").datepicker({
+      numberOfMonths: 3,
+      showButtonPanel: true,
+      dateFormat: "dd/mm/yy"
+    });    
+  });
+
+  $(function() {
+    $("#datepicker1").val("").prop('disabled', false); //clear after page reload
+    $("#datepicker1").datepicker({
+      numberOfMonths: 3,
+      showButtonPanel: true,
+      dateFormat: "dd/mm/yy"
+    });
+  });
+
+  $("#datepicker0").on('change', function() {
+    var dateRaw = $("#datepicker0").val().split("/");    
+    var dateString = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    //shift forward one day
+    poiDates_manual[0] = new Date(dateString.getTime() + day);
+    useManualDates(poiDates_manual);
+  });
+
+  $("#datepicker1").on('change', function() {
+    var dateRaw = $("#datepicker1").val().split("/");
+    var dateString = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    //shift forward one day
+    poiDates_manual[1] = new Date(dateString.getTime() + day);
+    useManualDates(poiDates_manual);
+  });
+
+  function useManualDates(poiDates_manual) {
+    d3.select("#dateReset").style("display", "block");
+
+    if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
+      //Reset poiDate chart filter
+      poiDimension.filter(poiDates_manual);
+      dc.redrawAll();
+    }
+  }
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
@@ -144,7 +202,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    //.filter(dc.filters.RangedFilter(dateFormat.parse("19620101"), dateFormat.parse("19621231")))
+    .filter(dc.filters.RangedFilter(dateFormat.parse("20150101"), dateFormat.parse("20151231")))
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -153,7 +211,7 @@ function initCrossfilter() {
     .elasticX(false)
     .renderHorizontalGridLines(true)
     .on("filtered", getBrushDates)
-    .on('zoomed', function(chart, filter) {
+    .on('zoomed', function(chart, filter) {      
 
       deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
 
@@ -182,7 +240,11 @@ function initCrossfilter() {
     .xAxis().tickFormat();
 
     function getBrushDates() {
-      if (poiChart.filters().length > 0) { 
+      if (poiChart.filters().length > 0) {
+        $("#datepicker0").val("").prop('disabled', true);
+        $("#datepicker1").val("").prop('disabled', true);
+        d3.select("#dateReset").style("display", "none");
+
         poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
         poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
       }
@@ -244,7 +306,7 @@ function initCrossfilter() {
     .elasticY(true)
     .dimension(corrDimension)
     .group(corrGrouping)
-    .on("preRedraw",update0)
+    //.on("preRedraw",update0)
     .x(d3.scale.linear().domain(corrRange))
     .xUnits(dc.units.fp.precision(corrBinWidth))
     //.round(function(d) {return corrBinWidth*Math.floor(d/corrBinWidth)})
@@ -267,7 +329,7 @@ function initCrossfilter() {
     .elasticY(true)
     .dimension(disDimension)
     .group(disGrouping)
-    .on("preRedraw",update0)
+    //.on("preRedraw",update0)
     .x(d3.scale.linear().domain(disRange))
     .xUnits(dc.units.fp.precision(disBinWidth))
     //.round(function(d) {return disBinWidth*Math.floor(d/disBinWidth)})
@@ -280,6 +342,18 @@ function initCrossfilter() {
   xAxis_disChart.ticks(6).tickFormat(d3.format("d"));
   yAxis_disChart = disChart.yAxis();
   yAxis_disChart.tickFormat(d3.format(",.2s")).tickSubdivide(0);
+
+  //-----------------------------------
+  dataCount = dc.dataCount('#chart-count');
+
+  dataCount 
+    .dimension(filter)
+    .group(filter.groupAll())
+    .html({
+    some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+          ' | <a href=\'javascript: resetAll();\'>Reset All</a>',
+          all: 'All records selected. Please click on the graph to apply filters.'
+    });
 
   //-----------------------------------
   dc.renderAll();
@@ -317,33 +391,41 @@ function initCrossfilter() {
 } //end initCrossfilter()
 
 //====================================================================
-// Update map markers, list and number of selected
-function update0() {  
-  //updateList();
-  d3.select("#active").text(filter.groupAll().value());
-}
-
-//====================================================================
 // Update dc charts, map markers, list and number of selected
 function update1() {
-  dc.redrawAll();  
-  //updateList();
-  d3.select("#active").text(filter.groupAll().value());
+  dc.redrawAll();
 }
 
 //====================================================================
-function resetChart(thisChart) {
-    //dc.refocusAll();
-    //poiChart.select(".brush rect.extent").attr("width", 0);
-    console.log("thisChart: ", thisChart)
+// Reset all
+function resetAll() {
+  $("#datepicker0").val("").prop("disabled", false);
+  $("#datepicker1").val("").prop("disabled", false);
 
-    if (thisChart.__dcFlag__ === 1 ) {//POI barChart     
+  poiChart.filterAll(); 
+  seasonsChart.filterAll();
+  decadeChart.filterAll();
+  corrChart.filterAll();
+  disChart.filterAll();
+  dc.redrawAll();
+}
+
+//====================================================================
+function resetChart(thisChart) {  
+
+    if (thisChart.__dcFlag__ === 1 ) {//POI barChart
       thisChart.focus()
-      thisChart.filterAll();  
+      thisChart.filterAll();
+
+      //Re-activate datepicker text inputs
+      $("#datepicker0").prop('disabled', false);
+      $("#datepicker1").prop('disabled', false);
+      d3.select("#dateReset").style("display", "none");
+
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
       //if they don't have any filters on
-      console.log("pie reset")      
+      console.log("pie reset")
       // if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {      
       //   poiChart.filterAll();
       // }
