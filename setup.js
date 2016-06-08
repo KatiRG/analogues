@@ -9,12 +9,14 @@ var decadeGrouping;
 
 var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
 
+var dateFormat = d3.time.format('%Y%m%d');
 var slpDateFormat = d3.time.format('%d-%b-%Y');
+var datepickerDateFormat = d3.time.format('%d/%m/%Y');
 var poiDates = [];
 var poiDates_manual = []; //filled by input date boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
-
-var dateFormat = d3.time.format('%Y%m%d');
+//default date range for poiChart upon page load
+var init_date0 = dateFormat.parse("20150101"), init_date1 = dateFormat.parse("20151231");
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
@@ -89,10 +91,10 @@ function initCrossfilter() {
  
   //-----------------------------------
   poiDimension = filter.dimension( function(d) {
-    return d.dateRef; //resolves to the day    
+    return d.dateRef; //resolves to the day
   });
   poiDayGrouping = poiDimension.group();
-  poiGrouping = poiDimension.group(function(d) {    
+  poiGrouping = poiDimension.group(function(d) {
     return d3.time.month(d); //resolves to the month
   });
 
@@ -103,7 +105,7 @@ function initCrossfilter() {
   seasonGrouping = seasonDimension.group();
 
   //-----------------------------------  
-  decadeDimension = filter.dimension(function(d) {    
+  decadeDimension = filter.dimension(function(d) {
     return d.dateAnlg;
   });
   decadeGrouping = decadeDimension.group();
@@ -143,8 +145,10 @@ function initCrossfilter() {
     
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
-  $(function() {    
-    $("#datepicker0").val("").prop('disabled', false); //clear after page reload
+  $(function() {
+    //datepickerDateFormat(init_date0)
+    //$("#datepicker0").val("").prop('disabled', false); //clear after page reload
+    $("#datepicker0").val(datepickerDateFormat(init_date0)).prop('disabled', false); //clear after page reload
     $("#datepicker0").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
@@ -153,7 +157,7 @@ function initCrossfilter() {
   });
 
   $(function() {
-    $("#datepicker1").val("").prop('disabled', false); //clear after page reload
+    $("#datepicker1").val(datepickerDateFormat(init_date1)).prop('disabled', false); //clear after page reload
     $("#datepicker1").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
@@ -162,18 +166,16 @@ function initCrossfilter() {
   });
 
   $("#datepicker0").on('change', function() {
-    var dateRaw = $("#datepicker0").val().split("/");    
-    var dateString = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    var dateObj = makeDateObj($("#datepicker0"));
     //shift forward one day
-    poiDates_manual[0] = new Date(dateString.getTime() + day);
+    poiDates_manual[0] = new Date(dateObj.getTime() + day);
     useManualDates(poiDates_manual);
   });
 
   $("#datepicker1").on('change', function() {
-    var dateRaw = $("#datepicker1").val().split("/");
-    var dateString = new Date(dateRaw[2], dateRaw[1] - 1, dateRaw[0]);
+    var dateObj = makeDateObj($("#datepicker1"));
     //shift forward one day
-    poiDates_manual[1] = new Date(dateString.getTime() + day);
+    poiDates_manual[1] = new Date(dateObj.getTime() + day);
     useManualDates(poiDates_manual);
   });
 
@@ -181,10 +183,25 @@ function initCrossfilter() {
     d3.select("#dateReset").style("display", "block");
 
     if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
+      d0 = makeDateObj($("#datepicker0"));
+      d1 = makeDateObj($("#datepicker1"));
+      console.log("d0: ", d0)
+      console.log("d1: ", d1)
       //Reset poiDate chart filter
+      poiDimension.filterAll();
+      resetChart(poiChart);
       poiDimension.filter(poiDates_manual);
+      poiChart.filter(dc.filters.RangedFilter(d0, d1));
       dc.redrawAll();
     }
+  }
+
+  function makeDateObj(dateRaw) {
+    var dateString = dateRaw.val().split("/");    
+    var dateObj = new Date(dateString[2], dateString[1] - 1, dateString[0]);
+
+    return dateObj;
+
   }
 
   //-----------------------------------
@@ -202,7 +219,7 @@ function initCrossfilter() {
     .group(poiGrouping)
     .transitionDuration(500)
     .centerBar(true)    
-    .filter(dc.filters.RangedFilter(dateFormat.parse("20150101"), dateFormat.parse("20151231")))
+    .filter(dc.filters.RangedFilter(init_date0, init_date1))
     .gap(10)    
     .x(d3.time.scale().domain(d3.extent(points, function(d) {
       return d.dateRef; 
@@ -241,9 +258,9 @@ function initCrossfilter() {
 
     function getBrushDates() {
       if (poiChart.filters().length > 0) {
-        $("#datepicker0").val("").prop('disabled', true);
-        $("#datepicker1").val("").prop('disabled', true);
-        d3.select("#dateReset").style("display", "none");
+        //Put poiChart brush dates in manual datepicker text boxes
+        $("#datepicker0").val(datepickerDateFormat(poiChart.filters()[0][0]));
+        $("#datepicker1").val(datepickerDateFormat(poiChart.filters()[0][1]));
 
         poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
         poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
