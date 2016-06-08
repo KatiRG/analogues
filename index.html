@@ -11,16 +11,21 @@
   <meta charset="utf-8">
   <title>Analogues Viewer</title>
 
-  <script src="lib/jquery-1.12.0.min.js"></script>  
+  <script src="lib/jquery-1.12.0.min.js"></script>
 
+  <!--https://jqueryui.com/datepicker/#multiple-calendars-->
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <!--<link rel="stylesheet" href="/resources/demos/style.css">-->
 
   <script src="lib/d3-3.5.15.min.js"></script>
   <script src="lib/crossfilter-1.3.12.min.js"></script>
 
   
-  <!--<script src="lib/dc.1.7.0.js"></script>-->
-  <script src="lib/my_dc.beta26.js"></script>
+  <!--<script src="lib/my_dc.min.js"></script>-->
   <!--<script src="lib/dc.beta26.js"></script>-->
+  <script src="lib/my_dc.beta26.js"></script>
   <link rel="stylesheet" href="lib/dc.min.css" />
 
   <script src="setup.js"></script>
@@ -55,8 +60,8 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="help.html">Help</a></li>
-            <li><a href="contact.html">Contact</a></li>
+            <li><a href="help.html" target="_blank">Help</a></li>
+            <li><a href="contact.html" target="_blank">Contact</a></li>
           </ul>
         </div>
         <!--/.nav-collapse -->
@@ -65,18 +70,42 @@
 
     <!-- Begin page content -->
     <div class="container">
-      <div class="row">        
-        <div id="totals"><span id="active">-</span> of <span id="total">-</span> analogues selected
-          <br><br>
+      <div class="row">
+        <div class="dc-chart col-md-8">
+          <div class="dc-data-count" id="chart-count">
+            <span class="filter-count"></span>analogues found out of <span class="total-count"></span> records
+          </div>
         </div>
-
       </div>
 
+      <p></p>
 
       <div class="row">
-        <div class="dc-chart col-md-6" id="chart-poi">
-          <div class="dc-chart-title">Period of Interest</div>
-          <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();zoomCheck();" 
+        <div class="dc-chart col-md-8">
+          <div class="dc-chart-title">Period of Interest (manual selection, format dd/mm/yyyy)</div>
+          <a id="dateReset" class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 
+             style="display: none;">reset</a>
+          <span class="reset" style="display: none;"></span>
+          <br>
+          <p>
+            Start Date: <input type="text" id="datepicker0">
+            End Date: <input type="text" id="datepicker1"></p>
+          <p>
+        </div>
+      </div>  
+
+      <div class="row">
+        <div class="dc-chart col-md-8" id="chart-poi">
+          <div class="dc-chart-title">Period of Interest (chart selection)</div>
+          <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 
+             style="display: none;">reset</a>
+          <span class="reset" style="display: none;"><span class="filter"></span></span>
+          <br>
+        </div>
+
+        <div class="dc-chart col-md-1" id="chart-seasons">
+          <div class="dc-chart-title">Season</div>
+          <a class="reset" href="javascript:seasonsChart.filterAll();dc.redrawAll();" 
              style="display: none;">reset</a>
           <span class="reset" style="display: none;"><span class="filter"></span></span>
           <br>
@@ -113,7 +142,7 @@
 
   <div id="footer">
     <div class="container">
-      <p class="text-muted credit"><a target="_blank" href="http://www.lsce.ipsl.fr/en"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span></a>&nbsp;
+      <p class="text-muted credit">Created by <a target="_blank" href="http://www.lsce.ipsl.fr/en"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span></a>&nbsp;
         <a target="_blank" href="http://www.lsce.ipsl.fr/en"><img src="LSCE_Icon.png" title="Climate and Environment Sciences Laboratory" /></a> and hosted by <a target="_blank" href="http://www.ipsl.fr/en"><span title="Institut Pierre Simon Laplace" style="font-weight:bold;">IPSL</span></a>&nbsp;
         <a target="_blank" href="http://www.ipsl.fr/en"><img src="IPSL_logo.png" title="Institut Pierre Simon Laplace" /></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2016/02/15</p>
     </div>
