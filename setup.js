@@ -185,8 +185,6 @@ function initCrossfilter() {
     if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
       d0 = makeDateObj($("#datepicker0"));
       d1 = makeDateObj($("#datepicker1"));
-      console.log("d0: ", d0)
-      console.log("d1: ", d1)
       //Reset poiDate chart filter
       poiDimension.filterAll();
       resetChart(poiChart);
@@ -441,8 +439,7 @@ function resetChart(thisChart) {
 
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
-      //if they don't have any filters on
-      console.log("pie reset")
+      //if they don't have any filters on      
       // if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {      
       //   poiChart.filterAll();
       // }
