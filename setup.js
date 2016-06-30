@@ -15,8 +15,6 @@ var datepickerDateFormat = d3.time.format('%d/%m/%Y');
 var poiDates = [];
 var poiDates_manual = []; //filled by input date boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
-//default date range for poiChart upon page load
-var init_date0 = dateFormat.parse("20150101"), init_date1 = dateFormat.parse("20151231");
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
@@ -28,19 +26,37 @@ var seasonColours = d3.scale.ordinal()
 var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
-// vars for scatterPlot (not implemented in this branch)
+// plot ranges
+var dataRange;
 var corrRange = [-0.08, 1.0];
 var disRange = [280, 1400];
 var corrBinWidth = 0.1, disBinWidth = 100.;
+var init_date0 = dateFormat.parse("19480101"), init_date1 = dateFormat.parse("19521231");
 //====================================================================
 function init() {
 
 //d3.tsv("analogues_19480101_20151225.json", function(data) {
-d3.tsv("analogues_19480101_20160520.json", function(data) {
-//d3.tsv("analogues_select.json", function(data) {  
+//d3.tsv("analogues_19480101_20160520.json", function(data) {
+d3.tsv("analogues_select.json", function(data) {  
   
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
+
+  //console.log("data: ", data)
+  var maxCorr = data.sort(function(a, b) {
+    return parseFloat(a.Corr) - parseFloat(b.Corr);
+  });
+  dataRange = data.sort(function(a, b) {
+    // var corrRange = parseFloat(a.Corr) - parseFloat(b.Corr);
+    // var disRange = parseFloat(a.Dis) - parseFloat(b.Dis);
+    return parseFloat(a.Dis) - parseFloat(b.Dis);
+  });
+
+  console.log("minCorr: ", maxCorr[0].Corr)
+  console.log("minCorr: ", maxCorr[0])
+  console.log("maxCorr: ", maxCorr[Object.keys(maxCorr).length - 1])
+  console.log("maxCorr: ", maxCorr[Object.keys(maxCorr).length - 1].Corr)
+  console.log("dataRange: ", dataRange)
     
   data.forEach(function (d, idx) {  
 
