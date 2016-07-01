@@ -27,78 +27,92 @@ var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
 // plot ranges
-var correlationRange, distanceRange;
-var corrRange = [-0.08, 1.0];
-var disRange = [280, 1400];
+var corrRange = [], disRange = [];
 var corrBinWidth = 0.1, disBinWidth = 100.;
-var init_date0 = dateFormat.parse("19480101"), init_date1 = dateFormat.parse("19521231");
+//initial date range selected on page load, computed one year from first date upon page load
+var init_date0, init_date1, dateRange = 365;
+
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_19480101_20151225.json", function(data) {
-//d3.tsv("analogues_19480101_20160520.json", function(data) {
-d3.tsv("analogues_select.json", function(data) {  
-  
-  minDate = dateFormat.parse(data[0].dateRef); //first date in file
-  maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
-
-  var sortCorr = data.sort(function(a, b) {
-    return parseFloat(a.Corr) - parseFloat(b.Corr);
-  });
-  var sortDis = data.sort(function(a, b) {
-    return parseFloat(a.Dis) - parseFloat(b.Dis);
-  });
-  correlationRange = [Math.floor(sortCorr[0].Corr), Math.floor(sortCorr[Object.keys(sortCorr).length - 1].Corr)];
-  distanceRange = [Math.floor(sortDis[0].Dis), Math.floor(sortDis[Object.keys(sortDis).length - 1].Dis)];
-
-  console.log("correlationRange: ", sortCorr[Object.keys(sortCorr).length - 1])
-  console.log("correlationRange: ", correlationRange)
-  console.log("distanceRange: ", distanceRange)
-
+  //d3.tsv("analogues_19480101_20151225.json", function(data) {
+  //d3.tsv("analogues_19480101_20160520.json", function(data) {
+  d3.tsv("analogues_select.json", function(data) {
     
-  data.forEach(function (d, idx) {  
+    minDate = dateFormat.parse(data[0].dateRef); //first date in file
+    maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
 
-    d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
-    d.Dis = +d.Dis;
-    d.Corr = +d.Corr;
+    //Set initial date range to display  
+    init_date0 = dateFormat.parse(data[0].dateRef);
+    init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);
 
-    yr = parseInt(d.dateAnlg.substring(0, 4));
+    console.log("init_date0: ", init_date0)
+    console.log("init_date1: ", init_date1)
+    console.log("minDate: ", minDate)
+    console.log("first: ", dateFormat.parse(data[0].dateRef))
 
-         if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
-    else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
-    else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
-    else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
-    else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
-    else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
-    else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
-    else if (yr == 2016) d.dateAnlg = "2016";
+    //Sort by correlation
+    data.sort(function(a, b) {
+      return parseFloat(a.Corr) - parseFloat(b.Corr);
+    });
+    //Save min and max correlation (rounded down/up)
+    corrRange = [Math.floor(data[0].Corr),
+                     Math.ceil(data[Object.keys(data).length - 1].Corr)];    
+
+    //Sort by distance
+    data.sort(function(a, b) {
+      return parseFloat(a.Dis) - parseFloat(b.Dis);
+    });
+    //Save min and max distance (rounded down/up)
+    disRange = [Math.floor(data[0].Dis/100)*100, 
+                     Math.ceil(data[Object.keys(data).length - 1].Dis/100)*100];
+      
+    data.forEach(function (d, idx) {
+      d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
+      d.Dis = +d.Dis;
+      d.Corr = +d.Corr;
+
+      yr = parseInt(d.dateAnlg.substring(0, 4));
+
+           if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
+      else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
+      else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
+      else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
+      else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
+      else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
+      else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
+      else if (yr == 2016) d.dateAnlg = "2016";
+      
+      //bin correlation and distance
+      d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
+      d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
+
+      //seasons
+      month = d.dateRef.getMonth() + 1; //Jan is 0    
+      if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
+      else if (month >= 3 && month <= 5) d.Season = 1; //MAM
+      else if (month >= 6 && month <= 8) d.Season = 2; //JJA
+      else if (month >= 9 && month <= 11) d.Season = 3; //SON
+   
+    });
+    points=data; 
+    fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
+
+    initCrossfilter();
+
+    update1();
     
-    //bin correlation and distance
-    d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
-    d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
+  }); //end d3.tsv
 
-    //seasons
-    month = d.dateRef.getMonth() + 1; //Jan is 0    
-    if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
-    else if (month >= 3 && month <= 5) d.Season = 1; //MAM
-    else if (month >= 6 && month <= 8) d.Season = 2; //JJA
-    else if (month >= 9 && month <= 11) d.Season = 3; //SON
- 
-  });  
-  points=data; 
-  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
-
-  initCrossfilter();
-
-  update1();
-  
-});
+  Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+  };
 
 }
 
 //====================================================================
 function initCrossfilter() {
-
 
   //-----------------------------------
   filter = crossfilter(points);
@@ -336,7 +350,7 @@ function initCrossfilter() {
     .dimension(corrDimension)
     .group(corrGrouping)
     //.on("preRedraw",update0)
-    .x(d3.scale.linear().domain(corrRange))
+    .x(d3.scale.linear().domain(corrRange))    
     .xUnits(dc.units.fp.precision(corrBinWidth))
     //.round(function(d) {return corrBinWidth*Math.floor(d/corrBinWidth)})
     .gap(0)
