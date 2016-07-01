@@ -201,16 +201,20 @@ function initCrossfilter() {
   });
 
   $("#datepicker1").on('change', function() {
+    console.log("poiDates_manual before: ", poiDates_manual)
     var dateObj = makeDateObj($("#datepicker1"));
     //shift forward one day
     poiDates_manual[1] = new Date(dateObj.getTime() + day);
+    console.log("poiDates_manual after: ", poiDates_manual)
     useManualDates(poiDates_manual);
   });
 
   function useManualDates(poiDates_manual) {
+    console.log("in useManualDates: ", poiDates_manual)
     d3.select("#dateReset").style("display", "block");
 
     if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
+      console.log("there are manual dates")
       d0 = makeDateObj($("#datepicker0"));
       d1 = makeDateObj($("#datepicker1"));
       //Reset poiDate chart filter
