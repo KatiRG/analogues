@@ -44,22 +44,22 @@ function init() {
 
     //Set initial date range to display  
     init_date0 = dateFormat.parse(data[0].dateRef);
-    init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);
+    //Add one year to initial date. If > maxDate, use maxDate
+    if (dateFormat.parse(data[0].dateRef).addDays(365).getTime() < maxDate.getTime()) {
+      init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);  
+    } else {
+      init_date1 = maxDate;
+    }
 
-    console.log("init_date0: ", init_date0)
-    console.log("init_date1: ", init_date1)
-    console.log("minDate: ", minDate)
-    console.log("first: ", dateFormat.parse(data[0].dateRef))
-
-    //Sort by correlation
+    //Sort by correlation to find correlation range
     data.sort(function(a, b) {
       return parseFloat(a.Corr) - parseFloat(b.Corr);
     });
     //Save min and max correlation (rounded down/up)
     corrRange = [Math.floor(data[0].Corr),
-                     Math.ceil(data[Object.keys(data).length - 1].Corr)];    
+                     Math.ceil(data[Object.keys(data).length - 1].Corr)];
 
-    //Sort by distance
+    //Sort by distance to find distance range
     data.sort(function(a, b) {
       return parseFloat(a.Dis) - parseFloat(b.Dis);
     });
