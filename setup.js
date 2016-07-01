@@ -27,7 +27,7 @@ var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
 // plot ranges
-var dataRange;
+var correlationRange, distanceRange;
 var corrRange = [-0.08, 1.0];
 var disRange = [280, 1400];
 var corrBinWidth = 0.1, disBinWidth = 100.;
@@ -42,21 +42,19 @@ d3.tsv("analogues_select.json", function(data) {
   minDate = dateFormat.parse(data[0].dateRef); //first date in file
   maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
 
-  //console.log("data: ", data)
-  var maxCorr = data.sort(function(a, b) {
+  var sortCorr = data.sort(function(a, b) {
     return parseFloat(a.Corr) - parseFloat(b.Corr);
   });
-  dataRange = data.sort(function(a, b) {
-    // var corrRange = parseFloat(a.Corr) - parseFloat(b.Corr);
-    // var disRange = parseFloat(a.Dis) - parseFloat(b.Dis);
+  var sortDis = data.sort(function(a, b) {
     return parseFloat(a.Dis) - parseFloat(b.Dis);
   });
+  correlationRange = [Math.floor(sortCorr[0].Corr), Math.floor(sortCorr[Object.keys(sortCorr).length - 1].Corr)];
+  distanceRange = [Math.floor(sortDis[0].Dis), Math.floor(sortDis[Object.keys(sortDis).length - 1].Dis)];
 
-  console.log("minCorr: ", maxCorr[0].Corr)
-  console.log("minCorr: ", maxCorr[0])
-  console.log("maxCorr: ", maxCorr[Object.keys(maxCorr).length - 1])
-  console.log("maxCorr: ", maxCorr[Object.keys(maxCorr).length - 1].Corr)
-  console.log("dataRange: ", dataRange)
+  console.log("correlationRange: ", sortCorr[Object.keys(sortCorr).length - 1])
+  console.log("correlationRange: ", correlationRange)
+  console.log("distanceRange: ", distanceRange)
+
     
   data.forEach(function (d, idx) {  
 
