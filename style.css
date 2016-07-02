@@ -30,11 +30,6 @@
     font-size: 10px;    
 }
 
-/*#chart-seasons {
-  transform: translate(-50px,-20px);
-  svg { width: 450px; }
-}*/
-
 .axis path, .axis line {
   fill: none;
   stroke: #333;

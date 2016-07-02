@@ -15,8 +15,6 @@ var datepickerDateFormat = d3.time.format('%d/%m/%Y');
 var poiDates = [];
 var poiDates_manual = []; //filled by input date boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
-//default date range for poiChart upon page load
-var init_date0 = dateFormat.parse("20150101"), init_date1 = dateFormat.parse("20151231");
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
@@ -28,63 +26,93 @@ var seasonColours = d3.scale.ordinal()
 var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 
 
-// vars for scatterPlot (not implemented in this branch)
-var corrRange = [-0.08, 1.0];
-var disRange = [280, 1400];
+// plot ranges
+var corrRange = [], disRange = [];
 var corrBinWidth = 0.1, disBinWidth = 100.;
+//initial date range selected on page load, computed one year from first date upon page load
+var init_date0, init_date1, dateRange = 365;
+
 //====================================================================
 function init() {
 
-//d3.tsv("analogues_19480101_20151225.json", function(data) {
-d3.tsv("analogues_19480101_20160520.json", function(data) {
-//d3.tsv("analogues_select.json", function(data) {  
-  
-  minDate = dateFormat.parse(data[0].dateRef); //first date in file
-  maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
+  //d3.tsv("analogues_19480101_20151225.json", function(data) {
+  //d3.tsv("analogues_19480101_20160520.json", function(data) {
+  d3.tsv("analogues_select.json", function(data) {
     
-  data.forEach(function (d, idx) {  
+    minDate = dateFormat.parse(data[0].dateRef); //first date in file
+    maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
 
-    d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
-    d.Dis = +d.Dis;
-    d.Corr = +d.Corr;
+    //Set initial date range to display  
+    init_date0 = dateFormat.parse(data[0].dateRef);
+    //Add one year to initial date. If > maxDate, use maxDate
+    if (dateFormat.parse(data[0].dateRef).addDays(365).getTime() < maxDate.getTime()) {
+      init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);  
+    } else {
+      init_date1 = maxDate;
+    }
 
-    yr = parseInt(d.dateAnlg.substring(0, 4));
+    //Sort by correlation to find correlation range
+    data.sort(function(a, b) {
+      return parseFloat(a.Corr) - parseFloat(b.Corr);
+    });
+    //Save min and max correlation (rounded down/up)
+    corrRange = [Math.floor(data[0].Corr),
+                     Math.ceil(data[Object.keys(data).length - 1].Corr)];
 
-         if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
-    else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
-    else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
-    else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
-    else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
-    else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
-    else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
-    else if (yr == 2016) d.dateAnlg = "2016";
+    //Sort by distance to find distance range
+    data.sort(function(a, b) {
+      return parseFloat(a.Dis) - parseFloat(b.Dis);
+    });
+    //Save min and max distance (rounded down/up)
+    disRange = [Math.floor(data[0].Dis/100)*100, 
+                     Math.ceil(data[Object.keys(data).length - 1].Dis/100)*100];
+      
+    data.forEach(function (d, idx) {
+      d.dateRef = dateFormat.parse(d.dateRef);  //resolution = day
+      d.Dis = +d.Dis;
+      d.Corr = +d.Corr;
+
+      yr = parseInt(d.dateAnlg.substring(0, 4));
+
+           if (yr >= 1948 && yr <= 1955) d.dateAnlg = "1948-1955";
+      else if (yr >= 1956 && yr <= 1965) d.dateAnlg = "1956-1965";
+      else if (yr >= 1966 && yr <= 1975) d.dateAnlg = "1966-1975";
+      else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
+      else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
+      else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
+      else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
+      else if (yr == 2016) d.dateAnlg = "2016";
+      
+      //bin correlation and distance
+      d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
+      d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
+
+      //seasons
+      month = d.dateRef.getMonth() + 1; //Jan is 0    
+      if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
+      else if (month >= 3 && month <= 5) d.Season = 1; //MAM
+      else if (month >= 6 && month <= 8) d.Season = 2; //JJA
+      else if (month >= 9 && month <= 11) d.Season = 3; //SON
+   
+    });
+    points=data; 
+    fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
+
+    initCrossfilter();
+
+    update1();
     
-    //bin correlation and distance
-    d.Corr = d3.format(",.1f")(corrBinWidth*Math.round( d.Corr/corrBinWidth ));
-    d.Dis = disBinWidth*Math.round( d.Dis/disBinWidth );
+  }); //end d3.tsv
 
-    //seasons
-    month = d.dateRef.getMonth() + 1; //Jan is 0    
-    if (month === 12 || month === 1 || month === 2) d.Season = 0; //DJF
-    else if (month >= 3 && month <= 5) d.Season = 1; //MAM
-    else if (month >= 6 && month <= 8) d.Season = 2; //JJA
-    else if (month >= 9 && month <= 11) d.Season = 3; //SON
- 
-  });  
-  points=data; 
-  fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
-
-  initCrossfilter();
-
-  update1();
-  
-});
+  Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+  };
 
 }
 
 //====================================================================
 function initCrossfilter() {
-
 
   //-----------------------------------
   filter = crossfilter(points);
@@ -131,17 +159,6 @@ function initCrossfilter() {
 
   //-----------------------------------
   //Manual date selection
-  //dcjs Gitter nordfjord Feb 17, 2015
-  //let dateDim = cf.dimension(d => d3.time.day(dateAccessor(d)));
-  //
-  //datepicker.on('change', (range)=> { // or equivolent event
-  //  dateDim.filterRange(range);
-  //  dc.chartRegistry.list(chartGroup).forEach(c => c.redraw());
-  //});
-  //You could go further on the change event and zoom in on the charts with something like:
-  //
-  //dc.chartRegistry.list(chartGroup)
-  //  .filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
     
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
@@ -182,18 +199,14 @@ function initCrossfilter() {
   function useManualDates(poiDates_manual) {
     d3.select("#dateReset").style("display", "block");
 
-    if(poiDates_manual[0] && poiDates_manual[1])  {//there are manual dates
-      d0 = makeDateObj($("#datepicker0"));
-      d1 = makeDateObj($("#datepicker1"));
-      console.log("d0: ", d0)
-      console.log("d1: ", d1)
-      //Reset poiDate chart filter
-      poiDimension.filterAll();
-      resetChart(poiChart);
-      poiDimension.filter(poiDates_manual);
-      poiChart.filter(dc.filters.RangedFilter(d0, d1));
-      dc.redrawAll();
-    }
+    d0 = makeDateObj($("#datepicker0"));
+    d1 = makeDateObj($("#datepicker1"));
+ 
+    poiDimension.filterAll();
+    resetChart(poiChart);
+    poiDimension.filter([d0, d1]);
+    poiChart.filter(dc.filters.RangedFilter(d0, d1));
+    dc.redrawAll();
   }
 
   function makeDateObj(dateRaw) {
@@ -283,22 +296,7 @@ function initCrossfilter() {
     .title(function(d) {
       return seasons[d.key] +": "+ d.value +" analogues";
     });
-    // .valueAccessor(function(d) {      
-    //   if (d.value != 0) return 0.25;
-    // });
-    // .renderlet(function (chart) {
-    //   chart.selectAll("g").attr("transform", "translate(36, 22)");
-    // });
-  
-  //DOESN'T WORK
-  // //display season name on reset instead of number
-  // if (d3.select('#chart-seasons').select('.filter').text()) {
-  //   console.log('here')
-  //   //d3.select('#chart-seasons').select('.filter').text(seasons[seasonsChart.filter()]);
-  //   d3.select('#chart-seasons').select('.filter').text("");
-  // }
-
-
+   
   //-----------------------------------
   decadeChart
     .width(380)
@@ -324,7 +322,7 @@ function initCrossfilter() {
     .dimension(corrDimension)
     .group(corrGrouping)
     //.on("preRedraw",update0)
-    .x(d3.scale.linear().domain(corrRange))
+    .x(d3.scale.linear().domain(corrRange))    
     .xUnits(dc.units.fp.precision(corrBinWidth))
     //.round(function(d) {return corrBinWidth*Math.floor(d/corrBinWidth)})
     .gap(0)
@@ -428,7 +426,7 @@ function resetAll() {
 }
 
 //====================================================================
-function resetChart(thisChart) {  
+function resetChart(thisChart) {
 
     if (thisChart.__dcFlag__ === 1 ) {//POI barChart
       thisChart.focus()
@@ -441,32 +439,9 @@ function resetChart(thisChart) {
 
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
-      //if they don't have any filters on
-      console.log("pie reset")
-      // if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {      
-      //   poiChart.filterAll();
-      // }
       poiChart.filterAll();
       corrChart.filterAll();
       disChart.filterAll();
     }
     
-
-    // console.log("poiChart.brushIsEmpty: ", poiChart.brushIsEmpty()) //lie
-    // console.log("corrChart.brushIsEmpty: ", corrChart.brushIsEmpty()) //lie
-
-    // poi_extent = poiChart.extendBrush();
-    // poiChart.filter(poi_extent); //removes dislpay of reset link
-
-    // corrChart.filterAll();
-    // disChart.filterAll();  
-    
-    //works only in console
-    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush .extent").attr("width", 0))
-    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent"))
-    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent")[0])   
-    //console.log("opacity: ", d3.select("#chart-poi").select(".brush rect.extent").style("fill-opacity", 0))
-    //d3.select("#chart-poi").select(".brush rect.extent").attr("width", 0);
-
-    //poiChart.select(".brush rect.extent").attr("width", 0);
 }
