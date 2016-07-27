@@ -159,17 +159,6 @@ function initCrossfilter() {
 
   //-----------------------------------
   //Manual date selection
-  //dcjs Gitter nordfjord Feb 17, 2015
-  //let dateDim = cf.dimension(d => d3.time.day(dateAccessor(d)));
-  //
-  //datepicker.on('change', (range)=> { // or equivolent event
-  //  dateDim.filterRange(range);
-  //  dc.chartRegistry.list(chartGroup).forEach(c => c.redraw());
-  //});
-  //You could go further on the change event and zoom in on the charts with something like:
-  //
-  //dc.chartRegistry.list(chartGroup)
-  //  .filter(c => c.x && c.x().invert(1) instanceof Date).forEach(c => c.x().domain(range))
     
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
@@ -209,7 +198,6 @@ function initCrossfilter() {
   });
 
   function useManualDates() {
-    
     d3.select("#dateReset").style("display", "block");
     d0 = makeDateObj($("#datepicker0"));
     d1 = makeDateObj($("#datepicker1"));
@@ -311,22 +299,7 @@ function initCrossfilter() {
     .title(function(d) {
       return seasons[d.key] +": "+ d.value +" analogues";
     });
-    // .valueAccessor(function(d) {      
-    //   if (d.value != 0) return 0.25;
-    // });
-    // .renderlet(function (chart) {
-    //   chart.selectAll("g").attr("transform", "translate(36, 22)");
-    // });
-  
-  //DOESN'T WORK
-  // //display season name on reset instead of number
-  // if (d3.select('#chart-seasons').select('.filter').text()) {
-  //   console.log('here')
-  //   //d3.select('#chart-seasons').select('.filter').text(seasons[seasonsChart.filter()]);
-  //   d3.select('#chart-seasons').select('.filter').text("");
-  // }
-
-
+   
   //-----------------------------------
   decadeChart
     .width(380)
@@ -456,7 +429,7 @@ function resetAll() {
 }
 
 //====================================================================
-function resetChart(thisChart) {  
+function resetChart(thisChart) {
 
     if (thisChart.__dcFlag__ === 1 ) {//POI barChart
       thisChart.focus()
@@ -469,31 +442,9 @@ function resetChart(thisChart) {
 
     } else { //seasons pieChart
       //clear all three barCharts that get activated by pieChart reset
-      //if they don't have any filters on      
-      // if ( ( poiChart.filters()[0][1] - poiChart.filters()[0][0] ) / (1000*60*60*24) === fullRange) {      
-      //   poiChart.filterAll();
-      // }
       poiChart.filterAll();
       corrChart.filterAll();
       disChart.filterAll();
     }
     
-
-    // console.log("poiChart.brushIsEmpty: ", poiChart.brushIsEmpty()) //lie
-    // console.log("corrChart.brushIsEmpty: ", corrChart.brushIsEmpty()) //lie
-
-    // poi_extent = poiChart.extendBrush();
-    // poiChart.filter(poi_extent); //removes dislpay of reset link
-
-    // corrChart.filterAll();
-    // disChart.filterAll();  
-    
-    //works only in console
-    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush .extent").attr("width", 0))
-    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent"))
-    //console.log("resetExtent: ", d3.select("#chart-dis").select(".brush").select("rect.extent")[0])   
-    //console.log("opacity: ", d3.select("#chart-poi").select(".brush rect.extent").style("fill-opacity", 0))
-    //d3.select("#chart-poi").select(".brush rect.extent").attr("width", 0);
-
-    //poiChart.select(".brush rect.extent").attr("width", 0);
 }
