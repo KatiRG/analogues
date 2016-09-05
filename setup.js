@@ -178,73 +178,65 @@ function initCrossfilter() {
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
   $(function() {
-                //datepickerDateFormat(init_date0)
-                //$("#datepicker0").val("").prop('disabled', false); //clear after page reload
-                $("#datepicker0").val(datepickerDateFormat(init_date0)).prop('disabled', false); //clear after page reload
-                $("#datepicker0").datepicker({
-                    numberOfMonths: 3,
-                    showButtonPanel: true,
-                    dateFormat: "dd/mm/yy"
-                });
+    //datepickerDateFormat(init_date0)
+    //$("#datepicker0").val("").prop('disabled', false); //clear after page reload
+    $("#datepicker0").val(datepickerDateFormat(init_date0)).prop('disabled', false); //clear after page reload
+    $("#datepicker0").datepicker({
+      numberOfMonths: 3,
+      showButtonPanel: true,
+      dateFormat: "dd/mm/yy"
+    });
   });
 
   $(function() {
-                $("#datepicker1").val(datepickerDateFormat(init_date1)).prop('disabled', false); //clear after page reload
-                $("#datepicker1").datepicker({
-                    numberOfMonths: 3,
-                    showButtonPanel: true,
-                    dateFormat: "dd/mm/yy"
-                });
+    $("#datepicker1").val(datepickerDateFormat(init_date1)).prop('disabled', false); //clear after page reload
+    $("#datepicker1").datepicker({
+      numberOfMonths: 3,
+      showButtonPanel: true,
+      dateFormat: "dd/mm/yy"
+    });
   });
 
   $("#datepicker0").on('change', function() {
-                var dateObj = makeDateObj($("#datepicker0"));
-                //shift forward one day
-                //poiDates_manual[0] = new Date(dateObj.getTime() + day);
-                poiDates_manual[0] = new Date(dateObj.getTime() );
-                useManualDates(poiDates_manual);
+    var dateObj = makeDateObj($("#datepicker0"));
+    poiDates_manual[0] = new Date(dateObj.getTime() );
+    useManualDates(poiDates_manual);
   });
 
   $("#datepicker1").on('change', function() {
-                var dateObj = makeDateObj($("#datepicker1"));
-                //shift forward one day
-                //poiDates_manual[1] = new Date(dateObj.getTime() + day);
-                poiDates_manual[1] = new Date(dateObj.getTime() );
-                useManualDates(poiDates_manual);
+    var dateObj = makeDateObj($("#datepicker1"));
+    poiDates_manual[1] = new Date(dateObj.getTime() );
+    useManualDates(poiDates_manual);
   });
 
   function useManualDates(poiDates_manual) {
-      d3.select("#dateReset").style("display", "block");
+    d3.select("#dateReset").style("display", "block");
 
-      d0 = makeDateObj($("#datepicker0"));
-      d1 = makeDateObj($("#datepicker1"));
+    d0 = makeDateObj($("#datepicker0"));
+    d1 = makeDateObj($("#datepicker1"));
 
-      d0.setHours(10);
-      d1.setHours(14);
-
-      //ageChart.filterAll();ageChart.filter(dc.filters.RangedFilter([-2.5, -2.5], [6.5, 6.5]));dc.redrawAll();
+    d0.setHours(10);
+    d1.setHours(14);    
 
       //poiChart.filterAll();
       poiChart.filter(null);
       poiChart.filter(dc.filters.RangedFilter(d0, d1));
-
       dc.redrawAll();
-             
-      // poiDimension.resetAll();
+
+      // poiDimension.filterAll();
       // resetChart(poiChart);
       // poiDimension.filter([d0, d1]);
       // poiChart.filter(dc.filters.RangedFilter(d0, d1));
       // dc.redrawAll();
+
   }
 
+  function makeDateObj(dateRaw) {
+    var dateString = dateRaw.val().split("/");
+    var dateObj = new Date(dateString[2], dateString[1] - 1, dateString[0]);
 
-function makeDateObj(dateRaw) {
-  var dateString = dateRaw.val().split("/");
-  var dateObj = new Date(dateString[2], dateString[1] - 1, dateString[0]);
-
-  return dateObj;
-
-}
+    return dateObj;
+  }
 
   //-----------------------------------
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
@@ -321,6 +313,9 @@ function makeDateObj(dateRaw) {
         //Put poiChart brush dates in manual datepicker text boxes
         $("#datepicker0").val(datepickerDateFormat(poiChart.filters()[0][0]));
         $("#datepicker1").val(datepickerDateFormat(poiChart.filters()[0][1]));
+
+        poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
+        poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
       }
     }
 
