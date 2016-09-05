@@ -38,21 +38,23 @@ function init() {
   //d3.tsv("analogues_19480101_20151225.json", function(data) {
   //d3.tsv("analogues_19480101_20160520.json", function(data) {
   //d3.tsv("analogues_select.json", function(data) {
-  d3.tsv("test2_edit.json", function(data) {
+  //d3.tsv("test2_edit.json", function(data) {
+  d3.tsv("test_gt1yr.json", function(data) {
+
 
     minDate = dateFormat.parse(data[0].dateRef); //first date in file
     maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
-    minDate.setHours(-1);
-    maxDate.setHours(2);
-    console.log("maxDate: ", maxDate)
+    // minDate.setHours(-1);
+    // maxDate.setHours(2);
+    console.log("minDate: ", minDate)
 
 
     //Set initial date range to display  
     init_date0 = dateFormat.parse(data[0].dateRef);
+    init_date0.setHours(12);
     //Add one year to initial date. If > maxDate, use maxDate
     if (dateFormat.parse(data[0].dateRef).addDays(365).getTime() < maxDate.getTime()) {
-      //init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);
-      init_date1 = minDate.addDays(365);
+      init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);
     } else {
       init_date1 = maxDate;
     }
@@ -76,6 +78,7 @@ function init() {
     data.forEach(function(d, idx) {
 
       d.dateRef = dateFormat.parse(d.dateRef); //resolution = day
+      d.dateRef.setHours(12);      
       d.Dis = +d.Dis;
       d.Corr = +d.Corr;
 
@@ -91,13 +94,8 @@ function init() {
       else if (yr == 2016) d.dateAnlg = "2016";
 
       //bin correlation and distance
-      //d.Corr = d3.format(",.1f")(corrBinWidth * Math.round(d.Corr / corrBinWidth));
-      //d.Corr = (corrBinWidth * Math.round(d.Corr / corrBinWidth));
-      // d.Dis = disBinWidth * Math.round(d.Dis / disBinWidth);
- 
       d.Corr = (corrBinWidth * Math.round(d.Corr / corrBinWidth)).toFixed(1)/1;
-                    
-      //d.Corr = +d.Corr; //necessary if using d3.format(",.1f")
+      d.Dis = disBinWidth * Math.round(d.Dis / disBinWidth).toFixed(1)/1;
                
       //seasons
       month = d.dateRef.getMonth() + 1; //Jan is 0    
@@ -106,6 +104,11 @@ function init() {
       else if (month >= 6 && month <= 8) d.Season = 2; //JJA
       else if (month >= 9 && month <= 11) d.Season = 3; //SON
     });
+    minDate.setHours(12);
+    maxDate.setHours(12);
+    console.log("mindate after: ", minDate)
+    console.log("maxdate after: ", maxDate)
+
     
     points=data; 
     fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
@@ -216,8 +219,8 @@ function initCrossfilter() {
       d0 = makeDateObj($("#datepicker0"));
       d1 = makeDateObj($("#datepicker1"));
 
-      d0.setHours(-1);
-      d1.setHours(2);
+      d0.setHours(10);
+      d1.setHours(14);
 
       //ageChart.filterAll();ageChart.filter(dc.filters.RangedFilter([-2.5, -2.5], [6.5, 6.5]));dc.redrawAll();
 
@@ -270,17 +273,12 @@ function makeDateObj(dateRaw) {
     .group(dateGroup)                
     .transitionDuration(500)
     .centerBar(true)
-    //.filter(dc.filters.RangedFilter(init_date0, init_date1))
     .filter(dc.filters.RangedFilter(minDate, init_date1))
     .gap(10)
-    // .x(d3.time.scale().domain(d3.extent(points, function(d) {
-    //   //console.log("d.dateRef in poiChart: ", d.dateRef)
-    //   return d.dateRef;
-    // })))
     //Subtract an hour from the minDate and add an hour to the maxDate to get an hour worth of 
     //padding on each side of your min and max data.
     //http://stackoverflow.com/questions/31808718/dc-js-barchart-first-and-last-bar-not-displaying-fully
-    .x(d3.time.scale().domain([d3.time.hour.offset(minDate, -1), d3.time.hour.offset(maxDate, 2)]))
+    .x(d3.time.scale().domain([d3.time.hour.offset(minDate, -10), d3.time.hour.offset(maxDate, 10)]))
     .elasticY(true)
     .elasticX(false)
     .renderHorizontalGridLines(true)
