@@ -43,7 +43,6 @@ function init() {
     minDate = dateFormat.parse(data[0].dateRef); //first date in file
     maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
 
-
     //Set initial date range to display  
     init_date0 = dateFormat.parse(data[0].dateRef);
     init_date0.setHours(12);
@@ -240,6 +239,13 @@ function initCrossfilter() {
   }
   var dateGroup = getDateGrouping();
 
+  console.log("minDate: ", minDate)
+  console.log("minDate.setHours(10): ", minDate.setHours(10))
+  //console.log("make date obj minDate: ", datepickerDateFormat(Date(minDate.setHours(10))))
+
+  //CANNOT do this in RangedFilter
+  minDate.setHours(10);
+  init_date1.setHours(14);
   poiChart
     .width(780)
     .height(200)
