@@ -197,52 +197,49 @@ function initCrossfilter() {
   $("#datepicker0").on('change', function() {
                 var dateObj = makeDateObj($("#datepicker0"));
                 //shift forward one day
-                poiDates_manual[0] = new Date(dateObj.getTime() + day);
-                //poiDates_manual[0] = new Date(dateObj.getTime() );
+                //poiDates_manual[0] = new Date(dateObj.getTime() + day);
+                poiDates_manual[0] = new Date(dateObj.getTime() );
                 useManualDates(poiDates_manual);
   });
 
   $("#datepicker1").on('change', function() {
                 var dateObj = makeDateObj($("#datepicker1"));
                 //shift forward one day
-                poiDates_manual[1] = new Date(dateObj.getTime() + day);
-                //poiDates_manual[1] = new Date(dateObj.getTime() );
+                //poiDates_manual[1] = new Date(dateObj.getTime() + day);
+                poiDates_manual[1] = new Date(dateObj.getTime() );
                 useManualDates(poiDates_manual);
   });
 
   function useManualDates(poiDates_manual) {
-                d3.select("#dateReset").style("display", "block");
+      d3.select("#dateReset").style("display", "block");
 
-                d0 = makeDateObj($("#datepicker0"));
-                d1 = makeDateObj($("#datepicker1"));
+      d0 = makeDateObj($("#datepicker0"));
+      d1 = makeDateObj($("#datepicker1"));
 
-                console.log("d0, d1: ", d0, d1)
-                // console.log("RangedFilter: ", dc.filters.RangedFilter(d0, d1))
+      d0.setHours(-1);
+      d1.setHours(2);
 
-                //ageChart.filterAll();ageChart.filter(dc.filters.RangedFilter([-2.5, -2.5], [6.5, 6.5]));dc.redrawAll();
+      //ageChart.filterAll();ageChart.filter(dc.filters.RangedFilter([-2.5, -2.5], [6.5, 6.5]));dc.redrawAll();
 
-                // //poiChart.filterAll();
-                // poiChart.filter(null);
-                // poiChart.filter(dc.filters.RangedFilter(d0, d1));
-                // console.log("poiChart.filter() after range: ", poiChart.filter())
-                // dc.redrawAll();
+      //poiChart.filterAll();
+      poiChart.filter(null);
+      poiChart.filter(dc.filters.RangedFilter(d0, d1));
+
+      dc.redrawAll();
              
-                poiDimension.resetAll();
-                resetChart(poiChart);
-                poiDimension.filter([d0, d1]);
-                poiChart.filter(dc.filters.RangedFilter(d0, d1));
-                dc.redrawAll();
-}
+      // poiDimension.resetAll();
+      // resetChart(poiChart);
+      // poiDimension.filter([d0, d1]);
+      // poiChart.filter(dc.filters.RangedFilter(d0, d1));
+      // dc.redrawAll();
+  }
 
 
 function makeDateObj(dateRaw) {
-                var dateString = dateRaw.val().split("/");
-                var dateObj = new Date(dateString[2], dateString[1] - 1, dateString[0]);
+  var dateString = dateRaw.val().split("/");
+  var dateObj = new Date(dateString[2], dateString[1] - 1, dateString[0]);
 
-                // console.log("dateString: ", dateString)
-                // console.log("dateObj: ", dateObj)
-
-                return dateObj;
+  return dateObj;
 
 }
 
