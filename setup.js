@@ -35,18 +35,13 @@ var init_date0, init_date1, dateRange = 365;
 //====================================================================
 function init() {
 
-  //d3.tsv("analogues_19480101_20151225.json", function(data) {
-  //d3.tsv("analogues_19480101_20160520.json", function(data) {
-  //d3.tsv("analogues_select.json", function(data) {
   //d3.tsv("test2_edit.json", function(data) {
   d3.tsv("test_gt1yr.json", function(data) {
+  //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
 
 
     minDate = dateFormat.parse(data[0].dateRef); //first date in file
     maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
-    // minDate.setHours(-1);
-    // maxDate.setHours(2);
-    console.log("minDate: ", minDate)
 
 
     //Set initial date range to display  
@@ -106,9 +101,6 @@ function init() {
     });
     minDate.setHours(12);
     maxDate.setHours(12);
-    console.log("mindate after: ", minDate)
-    console.log("maxdate after: ", maxDate)
-
     
     points=data; 
     fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
@@ -178,8 +170,6 @@ function initCrossfilter() {
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
   $(function() {
-    //datepickerDateFormat(init_date0)
-    //$("#datepicker0").val("").prop('disabled', false); //clear after page reload
     $("#datepicker0").val(datepickerDateFormat(init_date0)).prop('disabled', false); //clear after page reload
     $("#datepicker0").datepicker({
       numberOfMonths: 3,
@@ -453,8 +443,8 @@ function update1() {
 //====================================================================
 // Reset all
 function resetAll() {
-  $("#datepicker0").val("").prop("disabled", false);
-  $("#datepicker1").val("").prop("disabled", false);
+  $("#datepicker0").val(datepickerDateFormat(minDate)).prop("disabled", false);
+  $("#datepicker1").val(datepickerDateFormat(maxDate)).prop("disabled", false);
 
   poiChart.filterAll(); 
   seasonsChart.filterAll();
