@@ -163,6 +163,8 @@ function initCrossfilter() {
 
   //-----------------------------------
   //Manual date selection
+  var calendarFlag = 0; //1 = dates come from datePicker calendar
+  var calendarDate0, calendarDate1; //global, for datePicker text box
 
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
@@ -202,16 +204,21 @@ function initCrossfilter() {
     d0.setHours(10);
     d1.setHours(14);
 
-      //poiChart.filterAll();
-      poiChart.filter(null);
-      poiChart.filter(dc.filters.RangedFilter(d0, d1));
-      dc.redrawAll();
+    //global vars read by getBrushDates()
+    calendarFlag = 1;
+    calendarDate0 = d0;
+    calendarDate1 = d1;
 
-      // poiDimension.filterAll();
-      // resetChart(poiChart);
-      // poiDimension.filter([d0, d1]);
-      // poiChart.filter(dc.filters.RangedFilter(d0, d1));
-      // dc.redrawAll();
+    //poiChart.filterAll();
+    poiChart.filter(null);
+    poiChart.filter(dc.filters.RangedFilter(d0, d1));
+    dc.redrawAll();
+
+    // poiDimension.filterAll();
+    // resetChart(poiChart);
+    // poiDimension.filter([d0, d1]);
+    // poiChart.filter(dc.filters.RangedFilter(d0, d1));
+    // dc.redrawAll();
 
   }
 
@@ -228,6 +235,8 @@ function initCrossfilter() {
   var currentGranularity = 'month';
   var saveLevel = 0;
   var init_domain0 = dateFormat.parse("21000101"), init_domain1 = dateFormat.parse("2100101");
+
+
   //Determine date resolution of poiChart
   //http://stackoverflow.com/questions/23953019/dc-js-group-top5-not-working-in-chart
   function getDateGrouping() {
@@ -295,22 +304,34 @@ function initCrossfilter() {
       saveLevel = deltaYear;
       init_domain0 = chart.filter()[0];
       init_domain1 = chart.filter()[1];
+
     })
     .xAxis().tickFormat();
 
     function getBrushDates() {
       if (poiChart.filters().length > 0) {
 
-        //NOTE: brush limits not necessarily same as date limits
-        //So get dates within brush from chart.data()
-        var numBars = poiChart.data()[0].values.length; //number of bars displayed
-        var firstDate = poiChart.data()[0].values[0].x; //first date in brush window
-        var lastDate = poiChart.data()[0].values[numBars - 1].x; //last date in brush window
+        if (calendarFlag === 1) { //dates come from calendar
+          changeTextboxDates(calendarDate0, calendarDate1);
+          calendarFlag = 0; //reset
+        } else {//dates come from poiChart zoom
+          //NOTE: brush limits not necessarily same as date limits
+          //So get dates within brush from chart.data()
+          var numBars = poiChart.data()[0].values.length; //number of bars displayed
+          var firstDate = poiChart.data()[0].values[0].x; //first date in brush window
+          var lastDate = poiChart.data()[0].values[numBars - 1].x; //last date in brush window
 
-        //Put poiChart brush dates in manual datepicker text boxes
-        $("#datepicker0").val(datepickerDateFormat(firstDate));
-        $("#datepicker1").val(datepickerDateFormat(lastDate));
+          changeTextboxDates(firstDate, lastDate);
+        }
+        
       }
+    }
+
+    //Put poiChart brush dates in manual datepicker text boxes
+    function changeTextboxDates(d1, d2) {
+      //Put poiChart brush dates in manual datepicker text boxes
+      $("#datepicker0").val(datepickerDateFormat(d1));
+      $("#datepicker1").val(datepickerDateFormat(d2));
     }
 
   //-----------------------------------
