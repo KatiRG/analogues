@@ -10,10 +10,10 @@ var decadeGrouping;
 var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
 
 var dateFormat = d3.time.format('%Y%m%d');
+var dateFormat2 = d3.time.format('%Y%m%d%H%M');
+
 var slpDateFormat = d3.time.format('%d-%b-%Y');
-var datepickerDateFormat = d3.time.format('%d/%m/%Y');
-var poiDates = [];
-var poiDates_manual = []; //filled by input date boxes
+var datepickerDateFormat = d3.time.format('%d/%m/%Y'); //for display in calendar text boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
@@ -39,16 +39,16 @@ function init() {
   d3.tsv("test_gt1yr.json", function(data) {
   //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
 
-
-    minDate = dateFormat.parse(data[0].dateRef); //first date in file
-    maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef); //last date in file
+    var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
+    var lastDate = data[Object.keys(data).length - 1].dateRef + "1200";
+    minDate = dateFormat2.parse(firstDate);
+    maxDate = dateFormat2.parse(lastDate);
 
     //Set initial date range to display  
-    init_date0 = dateFormat.parse(data[0].dateRef);
-    init_date0.setHours(12);
+    init_date0 = dateFormat2.parse(data[0].dateRef + "1200");
     //Add one year to initial date. If > maxDate, use maxDate
     if (dateFormat.parse(data[0].dateRef).addDays(365).getTime() < maxDate.getTime()) {
-      init_date1 = dateFormat.parse(data[0].dateRef).addDays(365);
+      init_date1 = dateFormat2.parse(data[0].dateRef + "1200").addDays(365);
     } else {
       init_date1 = maxDate;
     }
@@ -71,8 +71,8 @@ function init() {
       
     data.forEach(function(d, idx) {
 
-      d.dateRef = dateFormat.parse(d.dateRef); //resolution = day
-      d.dateRef.setHours(12);      
+      //set time from midnight to noon
+      d.dateRef = dateFormat2.parse(d.dateRef + "1200"); //resolution = day
       d.Dis = +d.Dis;
       d.Corr = +d.Corr;
 
@@ -98,8 +98,6 @@ function init() {
       else if (month >= 6 && month <= 8) d.Season = 2; //JJA
       else if (month >= 9 && month <= 11) d.Season = 3; //SON
     });
-    minDate.setHours(12);
-    maxDate.setHours(12);
     
     points=data; 
     fullRange = ( maxDate - minDate ) / ( 1000*60*60*24 ); //range in days
@@ -187,25 +185,22 @@ function initCrossfilter() {
   });
 
   $("#datepicker0").on('change', function() {
-    var dateObj = makeDateObj($("#datepicker0"));
-    poiDates_manual[0] = new Date(dateObj.getTime() );
-    useManualDates(poiDates_manual);
+    useManualDates();
   });
 
   $("#datepicker1").on('change', function() {
-    var dateObj = makeDateObj($("#datepicker1"));
-    poiDates_manual[1] = new Date(dateObj.getTime() );
-    useManualDates(poiDates_manual);
+    useManualDates();
   });
 
-  function useManualDates(poiDates_manual) {
+  function useManualDates() {
     d3.select("#dateReset").style("display", "block");
 
     d0 = makeDateObj($("#datepicker0"));
     d1 = makeDateObj($("#datepicker1"));
 
+    //Offset by 2h on either side of brush
     d0.setHours(10);
-    d1.setHours(14);    
+    d1.setHours(14);
 
       //poiChart.filterAll();
       poiChart.filter(null);
@@ -222,7 +217,8 @@ function initCrossfilter() {
 
   function makeDateObj(dateRaw) {
     var dateString = dateRaw.val().split("/");
-    var dateObj = new Date(dateString[2], dateString[1] - 1, dateString[0]);
+    var dateStringFormat = dateString[2] + dateString[1] + dateString[0] + "1200";
+    dateObj = dateFormat2.parse(dateStringFormat);
 
     return dateObj;
   }
@@ -239,10 +235,8 @@ function initCrossfilter() {
   }
   var dateGroup = getDateGrouping();
 
-  console.log("minDate: ", minDate)
-  console.log("minDate.setHours(10): ", minDate.setHours(10))
-  //console.log("make date obj minDate: ", datepickerDateFormat(Date(minDate.setHours(10))))
-
+  //Set time for brush (10:00 to capture first date in brush window, 
+  //14:00 to capture last date in window)
   //CANNOT do this in RangedFilter
   minDate.setHours(10);
   init_date1.setHours(14);
@@ -264,7 +258,7 @@ function initCrossfilter() {
     .filter(dc.filters.RangedFilter(minDate, init_date1))
     .gap(10)
     //Subtract an hour from the minDate and add an hour to the maxDate to get an hour worth of 
-    //padding on each side of your min and max data.
+    //padding on x-axis on each side of your min and max data.
     //http://stackoverflow.com/questions/31808718/dc-js-barchart-first-and-last-bar-not-displaying-fully
     .x(d3.time.scale().domain([d3.time.hour.offset(minDate, -10), d3.time.hour.offset(maxDate, 10)]))
     .elasticY(true)
@@ -273,16 +267,16 @@ function initCrossfilter() {
     .on("filtered", getBrushDates)
     .on('zoomed', function(chart, filter) {
 
-      deltaYear = chart.filters()[0][1].getFullYear() - chart.filters()[0][0].getFullYear();
+      deltaYear = chart.filter()[1].getFullYear() - chart.filter()[0].getFullYear();
 
       //if analysis period < 1 year, set poiChart in day grouping mode
-      if (deltaYear === 0) {                        
+      if (deltaYear === 0) {
         chart.group(poiDayGrouping);
       }
 
       //handle weird case where zoom is stuck at same deltaYear 
       //while user keeps zooming out
-      else if (saveLevel - deltaYear === 0) {                        
+      else if (saveLevel - deltaYear === 0) {
         //only reset to default domain when no change in domain is happening at either ends
         if (init_domain0.getTime() === chart.filters()[0][0].getTime() &&
             init_domain1.getTime() === chart.filters()[0][1].getTime()) {
@@ -299,19 +293,23 @@ function initCrossfilter() {
 
       //reset to current values for comparison with next iteration through zoom handler
       saveLevel = deltaYear;
-      init_domain0 = chart.filters()[0][0];
-      init_domain1 = chart.filters()[0][1];
+      init_domain0 = chart.filter()[0];
+      init_domain1 = chart.filter()[1];
     })
     .xAxis().tickFormat();
 
-    function getBrushDates() {                
+    function getBrushDates() {
       if (poiChart.filters().length > 0) {
-        //Put poiChart brush dates in manual datepicker text boxes
-        $("#datepicker0").val(datepickerDateFormat(poiChart.filters()[0][0]));
-        $("#datepicker1").val(datepickerDateFormat(poiChart.filters()[0][1]));
 
-        poiDates[0] = slpDateFormat(poiChart.filters()[0][0]).toUpperCase();
-        poiDates[1] = slpDateFormat(poiChart.filters()[0][1]).toUpperCase();
+        //NOTE: brush limits not necessarily same as date limits
+        //So get dates within brush from chart.data()
+        var numBars = poiChart.data()[0].values.length; //number of bars displayed
+        var firstDate = poiChart.data()[0].values[0].x; //first date in brush window
+        var lastDate = poiChart.data()[0].values[numBars - 1].x; //last date in brush window
+
+        //Put poiChart brush dates in manual datepicker text boxes
+        $("#datepicker0").val(datepickerDateFormat(firstDate));
+        $("#datepicker1").val(datepickerDateFormat(lastDate));
       }
     }
 
