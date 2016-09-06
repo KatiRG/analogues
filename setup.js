@@ -9,10 +9,8 @@ var decadeGrouping;
 
 var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
 
-var dateFormat = d3.time.format('%Y%m%d');
-var dateFormat2 = d3.time.format('%Y%m%d%H%M');
 
-var slpDateFormat = d3.time.format('%d-%b-%Y');
+var dateFormat = d3.time.format('%Y%m%d%H%M');
 var datepickerDateFormat = d3.time.format('%d/%m/%Y'); //for display in calendar text boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
 
@@ -41,14 +39,14 @@ function init() {
 
     var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
     var lastDate = data[Object.keys(data).length - 1].dateRef + "1200";
-    minDate = dateFormat2.parse(firstDate);
-    maxDate = dateFormat2.parse(data[Object.keys(data).length - 1].dateRef + "1200");
+    minDate = dateFormat.parse(firstDate);
+    maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef + "1200");
 
     //Set initial date range to display  
-    init_date0 = dateFormat2.parse(data[0].dateRef + "1200");
+    init_date0 = dateFormat.parse(data[0].dateRef + "1200");
     //Add one year to initial date. If > maxDate, use maxDate
-    if (dateFormat.parse(data[0].dateRef).addDays(365).getTime() < maxDate.getTime()) {
-      init_date1 = dateFormat2.parse(data[0].dateRef + "1200").addDays(365);
+    if (dateFormat.parse(data[0].dateRef + "1200").addDays(365).getTime() < maxDate.getTime()) {
+      init_date1 = dateFormat.parse(data[0].dateRef + "1200").addDays(365);
     } else {
       init_date1 = maxDate;
     }
@@ -72,7 +70,7 @@ function init() {
     data.forEach(function(d, idx) {
 
       //set time from midnight to noon
-      d.dateRef = dateFormat2.parse(d.dateRef + "1200"); //resolution = day
+      d.dateRef = dateFormat.parse(d.dateRef + "1200"); //resolution = day
       d.Dis = +d.Dis;
       d.Corr = +d.Corr;
 
@@ -225,7 +223,7 @@ function initCrossfilter() {
   function makeDateObj(dateRaw) {
     var dateString = dateRaw.val().split("/");
     var dateStringFormat = dateString[2] + dateString[1] + dateString[0] + "1200";
-    dateObj = dateFormat2.parse(dateStringFormat);
+    dateObj = dateFormat.parse(dateStringFormat);
 
     return dateObj;
   }
@@ -234,7 +232,8 @@ function initCrossfilter() {
   //https://github.com/dc-js/dc.js/wiki/Zoom-Behaviors-Combined-with-Brush-and-Range-Chart
   var currentGranularity = 'month';
   var saveLevel = 0;
-  var init_domain0 = dateFormat.parse("21000101"), init_domain1 = dateFormat.parse("2100101");
+  var dateFormatForZoom = d3.time.format('%Y%m%d');
+  var init_domain0 = dateFormatForZoom.parse("21000101"), init_domain1 = dateFormatForZoom.parse("2100101");
 
 
   //Determine date resolution of poiChart
