@@ -330,7 +330,9 @@ function initCrossfilter() {
           var ms = Math.abs(poiChart.filter()[1] - poiChart.filter()[0]);
           if (   ms/(1000*60*60) < 24 
                  && poiChart.filter()[0].getHours() >= 12 
-                 ||  poiChart.filter()[1].getHours() <= 12) {
+                 ||  ( poiChart.filter()[1].getHours() <= 12 && 
+                           poiChart.filter()[0].getDay() === poiChart.filter()[1].getDay()) ) {
+            console.log("in btw days")
             $("#datepicker0").val(null);
             $("#datepicker1").val(null)
           } else {
@@ -338,10 +340,14 @@ function initCrossfilter() {
             //Determine correct start day
             var day_init = poiChart.filter()[0].getDay();
             console.log("day_init: ", day_init)
-            if ( poiChart.filter()[0].getHours() > 12 ) var day = day_init + 1; //next day
-            else var day = day_init;
+            if ( poiChart.filter()[0].getHours() > 12 ) var start_day = day_init + 1; //next day
+            else var start_day = day_init;
 
-            console.log("start day: ", day)
+            console.log("start day: ", start_day)
+
+            if (day_init === start_day) {
+              $("#datepicker0").val(datepickerDateFormat(poiChart.filter()[0]));
+            }
 
             // if (poiChart.filter()[1].getHours() < 12) console.log("its the day before")
             // else if 
