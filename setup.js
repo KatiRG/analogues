@@ -33,8 +33,8 @@ var init_date0, init_date1, dateRange = 365;
 //====================================================================
 function init() {
 
-  //d3.tsv("test2_edit.json", function(data) {
-  d3.tsv("test_gt1yr.json", function(data) {
+  d3.tsv("test2_edit.json", function(data) {
+  //d3.tsv("test_gt1yr.json", function(data) {
   //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
 
     var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
@@ -163,6 +163,7 @@ function initCrossfilter() {
   //Manual date selection
   var calendarFlag = 0; //1 = dates come from datePicker calendar
   var calendarDate0, calendarDate1; //global, for datePicker text box
+  var zoomFlag = 0; //1 = dates come from poiChart zoom
 
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
@@ -235,7 +236,6 @@ function initCrossfilter() {
   var dateFormatForZoom = d3.time.format('%Y%m%d');
   var init_domain0 = dateFormatForZoom.parse("21000101"), init_domain1 = dateFormatForZoom.parse("2100101");
 
-
   //Determine date resolution of poiChart
   //http://stackoverflow.com/questions/23953019/dc-js-group-top5-not-working-in-chart
   function getDateGrouping() {
@@ -275,6 +275,8 @@ function initCrossfilter() {
     .on("filtered", getBrushDates)
     .on('zoomed', function(chart, filter) {
 
+      zoomFlag = 1;
+
       deltaYear = chart.filter()[1].getFullYear() - chart.filter()[0].getFullYear();
 
       //if analysis period < 1 year, set poiChart in day grouping mode
@@ -313,7 +315,7 @@ function initCrossfilter() {
         if (calendarFlag === 1) { //dates come from calendar
           changeTextboxDates(calendarDate0, calendarDate1);
           calendarFlag = 0; //reset
-        } else {//dates come from poiChart zoom
+        } else if (zoomFlag === 1) {//dates come from poiChart zoom
           //NOTE: brush limits not necessarily same as date limits
           //So get dates within brush from chart.data()
           var numBars = poiChart.data()[0].values.length; //number of bars displayed
@@ -321,6 +323,29 @@ function initCrossfilter() {
           var lastDate = poiChart.data()[0].values[numBars - 1].x; //last date in brush window
 
           changeTextboxDates(firstDate, lastDate);
+          zoomFlag = 0; //reset
+        } else {//dates to come from sliding brush
+          
+          //if brush is in between two dates, display no dates in text boxes
+          var ms = Math.abs(poiChart.filter()[1] - poiChart.filter()[0]);
+          if (   ms/(1000*60*60) < 24 
+                 && poiChart.filter()[0].getHours() >= 12 
+                 ||  poiChart.filter()[1].getHours() <= 12) {
+            $("#datepicker0").val(null);
+            $("#datepicker1").val(null)
+          } else {
+  
+            //Determine correct start day
+            var day_init = poiChart.filter()[0].getDay();
+            console.log("day_init: ", day_init)
+            if ( poiChart.filter()[0].getHours() > 12 ) var day = day_init + 1; //next day
+            else var day = day_init;
+
+            console.log("start day: ", day)
+
+            // if (poiChart.filter()[1].getHours() < 12) console.log("its the day before")
+            // else if 
+          }
         }
         
       }
@@ -472,7 +497,7 @@ function resetAll() {
 
   //poiChart.filterAll();
   
-  poiDimension.filterAll();
+  //poiDimension.filterAll();
   resetChart(poiChart);
 
   seasonsChart.filterAll();
