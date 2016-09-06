@@ -42,7 +42,7 @@ function init() {
     minDate = dateFormat.parse(firstDate);
     maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef + "1200");
 
-    //Set initial date range to display  
+    //Set initial date range to display
     init_date0 = dateFormat.parse(data[0].dateRef + "1200");
     //Add one year to initial date. If > maxDate, use maxDate
     if (dateFormat.parse(data[0].dateRef + "1200").addDays(365).getTime() < maxDate.getTime()) {
@@ -106,12 +106,7 @@ function init() {
     
   }); //end d3.tsv
 
-  Date.prototype.addDays = function(days) {
-    this.setDate(this.getDate() + parseInt(days));
-    return this;
-  };
-
-}
+} //end fn init()
 
 //====================================================================
 function initCrossfilter() {
@@ -325,36 +320,31 @@ function initCrossfilter() {
           changeTextboxDates(firstDate, lastDate);
           zoomFlag = 0; //reset
         } else {//dates to come from sliding brush
-          
-          //if brush is in between two dates, display no dates in text boxes
-          var ms = Math.abs(poiChart.filter()[1] - poiChart.filter()[0]);
-          if (   ms/(1000*60*60) < 24 
-                 && poiChart.filter()[0].getHours() >= 12 
-                 ||  ( poiChart.filter()[1].getHours() <= 12 && 
-                           poiChart.filter()[0].getDay() === poiChart.filter()[1].getDay()) ) {
-            console.log("in btw days")
-            $("#datepicker0").val(null);
-            $("#datepicker1").val(null)
-          } else {
+
   
-            //Determine correct start day
-            var day_init = poiChart.filter()[0].getDay();
-            console.log("day_init: ", day_init)
-            if ( poiChart.filter()[0].getHours() > 12 ) var start_day = day_init + 1; //next day
-            else var start_day = day_init;
+            // //Determine correct start day
+            // var day_init = poiChart.filter()[0].getDay();
+            // console.log("day_init: ", day_init)
+            // if ( poiChart.filter()[0].getHours() > 12 ) var start_day = day_init + 1; //next day
+            // else var start_day = day_init;
 
-            console.log("start day: ", start_day)
+            // console.log("start day: ", start_day)
 
-            if (day_init === start_day) {
-              $("#datepicker0").val(datepickerDateFormat(poiChart.filter()[0]));
-            }
+            // if (day_init === start_day) {
+            //   $("#datepicker0").val(datepickerDateFormat(poiChart.filter()[0]));
+            // } else {
+            //   junk=poiChart.filter()[0];
+            //   junk.setDate(junk.getDate() + 1);
+            //   //$("#datepicker0").val(datepickerDateFormat(poiChart.filter()[0]).addDays(1));
+            //   console.log(junk)
+            //   console.log(datepickerDateFormat(junk))
+            // }
 
-            // if (poiChart.filter()[1].getHours() < 12) console.log("its the day before")
-            // else if 
-          }
+
         }
         
       }
+
     }
 
     //Put poiChart brush dates in manual datepicker text boxes
@@ -363,6 +353,8 @@ function initCrossfilter() {
       $("#datepicker0").val(datepickerDateFormat(d1));
       $("#datepicker1").val(datepickerDateFormat(d2));
     }
+
+
 
   //-----------------------------------
   seasonsChart
@@ -533,3 +525,9 @@ function resetChart(thisChart) {
     }
     
 }
+
+//====================================================================
+Date.prototype.addDays = function(days) {
+  this.setDate(this.getDate() + parseInt(days));
+  return this;
+};
