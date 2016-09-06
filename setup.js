@@ -42,7 +42,7 @@ function init() {
     var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
     var lastDate = data[Object.keys(data).length - 1].dateRef + "1200";
     minDate = dateFormat2.parse(firstDate);
-    maxDate = dateFormat2.parse(lastDate);
+    maxDate = dateFormat2.parse(data[Object.keys(data).length - 1].dateRef + "1200");
 
     //Set initial date range to display  
     init_date0 = dateFormat2.parse(data[0].dateRef + "1200");
@@ -468,10 +468,14 @@ function update1() {
 //====================================================================
 // Reset all
 function resetAll() {
-  $("#datepicker0").val(datepickerDateFormat(minDate)).prop("disabled", false);
-  $("#datepicker1").val(datepickerDateFormat(maxDate)).prop("disabled", false);
+  $("#datepicker0").val(datepickerDateFormat(minDate));
+  $("#datepicker1").val(datepickerDateFormat(maxDate));
 
-  poiChart.filterAll(); 
+  //poiChart.filterAll();
+  
+  poiDimension.filterAll();
+  resetChart(poiChart);
+
   seasonsChart.filterAll();
   decadeChart.filterAll();
   corrChart.filterAll();
