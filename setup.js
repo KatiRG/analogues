@@ -159,6 +159,7 @@ function initCrossfilter() {
   var calendarFlag = 0; //1 = dates come from datePicker calendar
   var calendarDate0, calendarDate1; //global, for datePicker text box
   var zoomFlag = 0; //1 = dates come from poiChart zoom
+  var slideFlag = 0; //1 = dates come from sliding brush
 
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
@@ -181,7 +182,9 @@ function initCrossfilter() {
   });
 
   $("#datepicker0").on('change', function() {
-    useManualDates();
+    //Do not trigger poiChart if dates come from sliding brush
+    if (slideFlag != 1) useManualDates();
+    else console.log("hold on!")
   });
 
   $("#datepicker1").on('change', function() {
@@ -320,25 +323,26 @@ function initCrossfilter() {
           changeTextboxDates(firstDate, lastDate);
           zoomFlag = 0; //reset
         } else {//dates to come from sliding brush
+          slideFlag = 1;
 
   
-            // //Determine correct start day
-            // var day_init = poiChart.filter()[0].getDay();
-            // console.log("day_init: ", day_init)
-            // if ( poiChart.filter()[0].getHours() > 12 ) var start_day = day_init + 1; //next day
-            // else var start_day = day_init;
+            //Determine correct start day
+            var day_init = poiChart.filter()[0].getDay();
+            var date_init = new Date(poiChart.filter()[0].getFullYear(),
+                                poiChart.filter()[0].getMonth(),
+                                poiChart.filter()[0].getDay());
+            
+            var start_day = poiChart.filter()[0].getHours() > 12 ? 
+                            date_init.addDays(1) : 
+                            poiChart.filter()[0];
 
-            // console.log("start day: ", start_day)
+            console.log("date_init: ", date_init)
+            console.log("poiChart filter[0]: ", poiChart.filter()[0])
+            console.log("start day: ", start_day)
 
-            // if (day_init === start_day) {
-            //   $("#datepicker0").val(datepickerDateFormat(poiChart.filter()[0]));
-            // } else {
-            //   junk=poiChart.filter()[0];
-            //   junk.setDate(junk.getDate() + 1);
-            //   //$("#datepicker0").val(datepickerDateFormat(poiChart.filter()[0]).addDays(1));
-            //   console.log(junk)
-            //   console.log(datepickerDateFormat(junk))
-            // }
+            $("#datepicker0").val(datepickerDateFormat(start_day));
+
+            slideFlag = 0; //reset
 
 
         }
@@ -353,6 +357,11 @@ function initCrossfilter() {
       $("#datepicker0").val(datepickerDateFormat(d1));
       $("#datepicker1").val(datepickerDateFormat(d2));
     }
+
+    Date.prototype.addDays = function(days) {
+      this.setDate(this.getDate() + parseInt(days));
+      return this;
+    };
 
 
 
