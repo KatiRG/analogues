@@ -33,10 +33,12 @@ var init_date0, init_date1, dateRange = 365;
 //====================================================================
 function init() {
 
-  d3.tsv("test2_edit.json", function(data) {
+  //d3.tsv("test2_edit.json", function(data) {
   //d3.tsv("test_gt1yr.json", function(data) {
   //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
-
+  //d3.tsv("test_span2months.json", function(data) {
+  d3.tsv("test_span2months_edit.json", function(data) {
+    
     var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
     var lastDate = data[Object.keys(data).length - 1].dateRef + "1200";
     minDate = dateFormat.parse(firstDate);
@@ -333,27 +335,12 @@ function initCrossfilter() {
             
             //Find date(s) in brush window (not necessarily same as filter endpts)
             var start_day = poiChart.filter()[0].getHours() > 12 ? 
-                            date0_init.addDays(1) : 
-                            poiChart.filter()[0];
+                            shiftDay("addDay") : 
+                            poiChart.filter()[0];                
 
             var end_day = poiChart.filter()[1].getHours() < 12 ? 
-                            date1_init.subtractDays(1) : 
+                            shiftDay("subtractDay") : 
                             poiChart.filter()[1];
-
-            // var Ash_Wednesday = new Date (
-            //   poiChart.filter()[1].getFullYear(),  
-            //   poiChart.filter()[1].getMonth(),  
-            //   (poiChart.filter()[1].getDate()-1)  
-            // );
-            // console.log("Ash_Wednesday: ", Ash_Wednesday)
-
-            // console.log("date0_init: ", date0_init)
-            // console.log("poiChart filter[0]: ", poiChart.filter()[0])
-            // console.log("start day: ", start_day)
-
-            // console.log("date1_init: ", date1_init)
-            // console.log("filter[1] hours: ", poiChart.filter()[1].getHours())
-            // console.log("end day: ", end_day)
 
             //Update date display in calendar text boxes
             $("#datepicker0").val(datepickerDateFormat(start_day));
@@ -372,15 +359,17 @@ function initCrossfilter() {
       $("#datepicker1").val(datepickerDateFormat(d2));
     }
 
-    Date.prototype.addDays = function(days) {
-      this.setDate(this.getDate() + parseInt(days));
-      return this;
-    };
-
-    Date.prototype.subtractDays = function(days) {
-      this.setDate(this.getDate() - parseInt(days));
-      return this;
-    };
+    function shiftDay(whichSign) {
+      if (whichSign === "addDay") {
+        return new Date ( poiChart.filter()[0].getFullYear(),
+                          poiChart.filter()[0].getMonth(),
+                          (poiChart.filter()[0].getDate()+1) )
+      } else if (whichSign === "subtractDay") {
+        return new Date ( poiChart.filter()[1].getFullYear(),
+                          poiChart.filter()[1].getMonth(),
+                          (poiChart.filter()[1].getDate()-1) )
+      }
+    }
 
 
 
