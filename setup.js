@@ -159,7 +159,6 @@ function initCrossfilter() {
   var calendarFlag = 0; //1 = dates come from datePicker calendar
   var calendarDate0, calendarDate1; //global, for datePicker text box
   var zoomFlag = 0; //1 = dates come from poiChart zoom
-  var slideFlag = 0; //1 = dates come from sliding brush
 
   //Datepicker
   //https://jqueryui.com/datepicker/#multiple-calendars
@@ -183,8 +182,7 @@ function initCrossfilter() {
 
   $("#datepicker0").on('change', function() {
     //Do not trigger poiChart if dates come from sliding brush
-    if (slideFlag != 1) useManualDates();
-    else console.log("hold on!")
+    useManualDates();    
   });
 
   $("#datepicker1").on('change', function() {
@@ -323,27 +321,43 @@ function initCrossfilter() {
           changeTextboxDates(firstDate, lastDate);
           zoomFlag = 0; //reset
         } else {//dates to come from sliding brush
-          slideFlag = 1;
 
-  
-            //Determine correct start day
-            var day_init = poiChart.filter()[0].getDay();
-            var date_init = new Date(poiChart.filter()[0].getFullYear(),
+            //Store initial filter endpt dates
+            var date0_init = new Date(poiChart.filter()[0].getFullYear(),
                                 poiChart.filter()[0].getMonth(),
                                 poiChart.filter()[0].getDay());
+
+            var date1_init = new Date(poiChart.filter()[1].getFullYear(),
+                                poiChart.filter()[1].getMonth(),
+                                poiChart.filter()[1].getDay());
             
+            //Find date(s) in brush window (not necessarily same as filter endpts)
             var start_day = poiChart.filter()[0].getHours() > 12 ? 
-                            date_init.addDays(1) : 
+                            date0_init.addDays(1) : 
                             poiChart.filter()[0];
 
-            console.log("date_init: ", date_init)
-            console.log("poiChart filter[0]: ", poiChart.filter()[0])
-            console.log("start day: ", start_day)
+            var end_day = poiChart.filter()[1].getHours() < 12 ? 
+                            date1_init.subtractDays(1) : 
+                            poiChart.filter()[1];
 
+            // var Ash_Wednesday = new Date (
+            //   poiChart.filter()[1].getFullYear(),  
+            //   poiChart.filter()[1].getMonth(),  
+            //   (poiChart.filter()[1].getDate()-1)  
+            // );
+            // console.log("Ash_Wednesday: ", Ash_Wednesday)
+
+            // console.log("date0_init: ", date0_init)
+            // console.log("poiChart filter[0]: ", poiChart.filter()[0])
+            // console.log("start day: ", start_day)
+
+            // console.log("date1_init: ", date1_init)
+            // console.log("filter[1] hours: ", poiChart.filter()[1].getHours())
+            // console.log("end day: ", end_day)
+
+            //Update date display in calendar text boxes
             $("#datepicker0").val(datepickerDateFormat(start_day));
-
-            slideFlag = 0; //reset
-
+            $("#datepicker1").val(datepickerDateFormat(end_day));
 
         }
         
@@ -360,6 +374,11 @@ function initCrossfilter() {
 
     Date.prototype.addDays = function(days) {
       this.setDate(this.getDate() + parseInt(days));
+      return this;
+    };
+
+    Date.prototype.subtractDays = function(days) {
+      this.setDate(this.getDate() - parseInt(days));
       return this;
     };
 
