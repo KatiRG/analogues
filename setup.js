@@ -34,10 +34,11 @@ var init_date0, init_date1, dateRange = 365;
 function init() {
 
   //d3.tsv("test2_edit.json", function(data) {
+  d3.tsv("test_gt1yr_birdhouse.json", function(data) {
   //d3.tsv("test_gt1yr.json", function(data) {
   //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
   //d3.tsv("test_span2months.json", function(data) {
-  d3.tsv("test_span2months_edit.json", function(data) {
+  //d3.tsv("test_span2months_edit.json", function(data) {
     
     var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
     var lastDate = data[Object.keys(data).length - 1].dateRef + "1200";
@@ -311,9 +312,12 @@ function initCrossfilter() {
       if (poiChart.filters().length > 0) {
 
         if (calendarFlag === 1) { //dates come from calendar
+    
           changeTextboxDates(calendarDate0, calendarDate1);
           calendarFlag = 0; //reset
+
         } else if (zoomFlag === 1) {//dates come from poiChart zoom
+
           //NOTE: brush limits not necessarily same as date limits
           //So get dates within brush from chart.data()
           var numBars = poiChart.data()[0].values.length; //number of bars displayed
@@ -322,37 +326,51 @@ function initCrossfilter() {
 
           changeTextboxDates(firstDate, lastDate);
           zoomFlag = 0; //reset
+
         } else {//dates to come from sliding brush
 
-            //Store initial filter endpt dates
-            var date0_init = new Date(poiChart.filter()[0].getFullYear(),
-                                poiChart.filter()[0].getMonth(),
-                                poiChart.filter()[0].getDay());
-
-            var date1_init = new Date(poiChart.filter()[1].getFullYear(),
-                                poiChart.filter()[1].getMonth(),
-                                poiChart.filter()[1].getDay());
+            //Determine resolution of poiChart
+            var monthResoln = false;
+            if ( (poiChart.group().all()[1].key - poiChart.group().all()[0].key) / ( 1000*60*60*24 ) > 1) {
+              monthResoln = true;
+            }
             
-            //Find date(s) in brush window (not necessarily same as filter endpts)
-            var start_day = poiChart.filter()[0].getHours() > 12 ? 
-                            shiftDay("addDay") : 
-                            poiChart.filter()[0];                
+            if (!monthResoln) {//resoln = day; custom code to find date in brush window
+              
+              //Store initial filter endpt dates
+              var date0_init = new Date(poiChart.filter()[0].getFullYear(),
+                                  poiChart.filter()[0].getMonth(),
+                                  poiChart.filter()[0].getDay());
 
-            var end_day = poiChart.filter()[1].getHours() < 12 ? 
-                            shiftDay("subtractDay") : 
-                            poiChart.filter()[1];
+              var date1_init = new Date(poiChart.filter()[1].getFullYear(),
+                                  poiChart.filter()[1].getMonth(),
+                                  poiChart.filter()[1].getDay());
+              
+              //Find date(s) in brush window (not necessarily same as filter endpts)
+              var start_day = poiChart.filter()[0].getHours() > 12 ? 
+                              shiftDay("addDay") : 
+                              poiChart.filter()[0];
+
+              var end_day = poiChart.filter()[1].getHours() < 12 ? 
+                              shiftDay("subtractDay") : 
+                              poiChart.filter()[1];
+
+              //Update date display in calendar text boxes
+              changeTextboxDates(start_day, end_day);
+
+          } else {//resoln = month; take dates from chart filters
 
             //Update date display in calendar text boxes
-            $("#datepicker0").val(datepickerDateFormat(start_day));
-            $("#datepicker1").val(datepickerDateFormat(end_day));
+            changeTextboxDates(poiChart.filter()[0], poiChart.filter()[1]);
 
-        }
+          }//end monthResoln check
+
+        } //end flag check for picking dates
         
-      }
+      } //end check of poiChart filters length
 
-    }
+    } //end fn getBrushDates
 
-    //Put poiChart brush dates in manual datepicker text boxes
     function changeTextboxDates(d1, d2) {
       //Put poiChart brush dates in manual datepicker text boxes
       $("#datepicker0").val(datepickerDateFormat(d1));
@@ -370,8 +388,6 @@ function initCrossfilter() {
                           (poiChart.filter()[1].getDate()-1) )
       }
     }
-
-
 
   //-----------------------------------
   seasonsChart
