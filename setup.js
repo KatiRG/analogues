@@ -172,7 +172,9 @@ function initCrossfilter() {
     $("#datepicker0").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
-      dateFormat: "dd/mm/yy"
+      dateFormat: "dd/mm/yy",
+      minDate: minDate,
+      maxDate: maxDate
     });
   });
 
@@ -181,9 +183,65 @@ function initCrossfilter() {
     $("#datepicker1").datepicker({
       numberOfMonths: 3,
       showButtonPanel: true,
-      dateFormat: "dd/mm/yy"
+      dateFormat: "dd/mm/yy",
+      minDate: minDate,
+      maxDate: maxDate
     });
   });
+
+  //--
+  //https://jqueryui.com/datepicker/#date-range
+  // $( function() {
+  //   $("#datepicker0").val(datepickerDateFormat(init_date0)).prop('disabled', false); //clear after page reload
+  //   $("#datepicker1").val(datepickerDateFormat(init_date1)).prop('disabled', false); //clear after page reload
+  //   var from = $( "#datepicker0" )
+  //       .datepicker({
+  //         defaultDate: "+1w",
+  //         changeMonth: true,
+  //         numberOfMonths: 3,
+  //         dateFormat: "dd/mm/yy",
+  //         showButtonPanel: true,
+  //         minDate: minDate,
+  //         maxDate: maxDate
+  //       })
+  //       .on( "change", function() {
+  //         to.datepicker( "option", "minDate", getCalendarDate( this ) );
+  //         useManualDates();
+  //       }),
+  //     to = $( "#datepicker1" ).datepicker({
+  //       defaultDate: "+1w",
+  //       changeMonth: true,
+  //       numberOfMonths: 3,
+  //       showButtonPanel: true,
+  //       dateFormat: "dd/mm/yy",
+  //       minDate: minDate,
+  //       maxDate: maxDate
+  //     })
+  //     .on( "change", function() {
+  //       console.log("this: ", this)
+  //       from.datepicker( "option", "maxDate", getCalendarDate( this ) );
+  //       useManualDates();
+  //     });
+  //     // .on("keypress", function() {
+  //     //   console.log("keypress")
+  //     // })
+  //     // .on('click', function() {
+  //     //   //d3.select("#ui-datepicker-div").style("display", "block");
+  //     //   from.datepicker( "option", "maxDate", getCalendarDate( this ) );
+  //     // });
+ 
+  //   function getCalendarDate( element ) {
+  //     var date;
+  //     try {
+  //       date = $.datepicker.parseDate( "dd/mm/yy", element.value );
+  //     } catch( error ) {
+  //       date = null;
+  //     }
+ 
+  //     return date;
+  //   }
+  // } );
+  //--
 
   //Activate calendar popup in case closed by invalid date selection
   $("#datepicker0").on('click', function() {
@@ -209,6 +267,11 @@ function initCrossfilter() {
 
     var d0 = makeDateObj($("#datepicker0")),
         d1 = makeDateObj($("#datepicker1"));
+
+    if (d0 < minDate) {
+      console.log("d0: ", d0)
+      console.log("minDate: ", minDate)
+    }    
 
     var diffDate = ( d1 - d0 ) / ( 1000*60*60*24 ); //diff in days
     if (diffDate < 0) {
