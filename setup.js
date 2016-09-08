@@ -33,8 +33,10 @@ var init_date0, init_date1, dateRange = 365;
 //====================================================================
 function init() {
 
-  //d3.tsv("test2_edit.json", function(data) {
   d3.tsv("test_gt1yr_birdhouse.json", function(data) {
+  //d3.tsv("test_gt1yr_birdhouse_03Jan2013.json", function(data) {
+
+  //d3.tsv("test2_edit.json", function(data) {
   //d3.tsv("test_gt1yr.json", function(data) {
   //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
   //d3.tsv("test_span2months.json", function(data) {
@@ -183,6 +185,16 @@ function initCrossfilter() {
     });
   });
 
+  //Activate calendar popup in case closed by invalid date selection
+  $("#datepicker0").on('click', function() {
+    d3.select("#ui-datepicker-div").style("display", "block");
+  });
+
+  $("#datepicker1").on('click', function() {
+    d3.select("#ui-datepicker-div").style("display", "block");
+  });
+
+  //Pass start and end date selections to poiChart
   $("#datepicker0").on('change', function() {
     //Do not trigger poiChart if dates come from sliding brush
     useManualDates();    
@@ -195,8 +207,23 @@ function initCrossfilter() {
   function useManualDates() {
     d3.select("#dateReset").style("display", "block");
 
-    d0 = makeDateObj($("#datepicker0"));
-    d1 = makeDateObj($("#datepicker1"));
+    var d0 = makeDateObj($("#datepicker0")),
+        d1 = makeDateObj($("#datepicker1"));
+
+    var diffDate = ( d1 - d0 ) / ( 1000*60*60*24 ); //diff in days
+    if (diffDate < 0) {
+      alert("End Date is earlier than Start Date");
+      $("#datepicker0").val(datepickerDateFormat(minDate));
+      $("#datepicker1").val(datepickerDateFormat(maxDate));
+
+      //close calendar
+      d3.select("#ui-datepicker-div").style("display", "none");
+
+      //pass min and max dates to poiChart
+      d0 = minDate;
+      d1 = maxDate;
+     
+    }
 
     //Offset by 2h on either side of brush
     d0.setHours(10);
@@ -211,6 +238,8 @@ function initCrossfilter() {
     poiChart.filter(null);
     poiChart.filter(dc.filters.RangedFilter(d0, d1));
     dc.redrawAll();
+
+    
 
     // poiDimension.filterAll();
     // resetChart(poiChart);
@@ -371,10 +400,10 @@ function initCrossfilter() {
 
     } //end fn getBrushDates
 
-    function changeTextboxDates(d1, d2) {
+    function changeTextboxDates(d0, d1) {
       //Put poiChart brush dates in manual datepicker text boxes
-      $("#datepicker0").val(datepickerDateFormat(d1));
-      $("#datepicker1").val(datepickerDateFormat(d2));
+      $("#datepicker0").val(datepickerDateFormat(d0));
+      $("#datepicker1").val(datepickerDateFormat(d1));
     }
 
     function shiftDay(whichSign) {
