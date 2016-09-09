@@ -34,6 +34,7 @@ var init_date0, init_date1;
 //====================================================================
 function init() {
 
+  //http://birdhouse-lsce.extra.cea.fr:8090/wpsoutputs/flyingpigeon/analogs-73cd782c-74f4-11e6-bf5f-f73f2a3d7e35.txt
   d3.tsv("test_gt1yr_birdhouse.json", function(data) {
   //d3.tsv("test_gt1yr_birdhouse_03Jan2013.json", function(data) {
 
@@ -52,7 +53,8 @@ function init() {
     init_date0 = dateFormat.parse(data[0].dateRef + dataHour);
     //Add one year to initial date. If > maxDate, use maxDate
     if (dateFormat.parse(data[0].dateRef + dataHour).addDays(365).getTime() < maxDate.getTime()) {
-      init_date1 = dateFormat.parse(data[0].dateRef + dataHour).addDays(365);
+      init_date1 = dateFormat.parse(data[0].dateRef + dataHour).addDays(364);
+      init_date1.setHours(14); //to catch last day of month at 12:00
     } else {
       init_date1 = maxDate;
     }
@@ -317,7 +319,7 @@ function initCrossfilter() {
 
       zoomFlag = 1;
 
-      //If > 265, show dates in month resolution
+      //If > resolnLimit, show dates in month resolution
       var deltaYear = ( chart.filter()[1] - chart.filter()[0] ) / ( 1000*60*60*24 ); //diff in days
       
       console.log("deltaYear: ", deltaYear)
@@ -330,7 +332,6 @@ function initCrossfilter() {
       //handle weird case where zoom is stuck at same deltaYear and cannot zoom out further
       //while user keeps zooming out
       else if (saveLevel - deltaYear === 0) {
-        console.log("weird case: ", chart.filter())
         //only reset to default domain when no change in domain is happening at either ends
         if (init_domain0.getTime() === chart.filter()[0].getTime() &&
             init_domain1.getTime() === chart.filter()[1].getTime()) {
@@ -415,9 +416,11 @@ function initCrossfilter() {
               changeTextboxDates(start_day, end_day);
 
           } else {//resoln = month; take dates from chart filters
+              //Subtract 1 day from filter limit
+              var end_day = shiftDay("subtractDay");
 
             //Update date display in calendar text boxes
-            changeTextboxDates(poiChart.filter()[0], poiChart.filter()[1]);
+            changeTextboxDates(poiChart.filter()[0], end_day);
 
           }//end monthResoln check
 
