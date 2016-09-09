@@ -29,7 +29,7 @@ var seasons = { 0: "DJF", 1: "MAM", 2: "JJA", 3: "SON" };
 var corrRange = [], disRange = [];
 var corrBinWidth = 0.1, disBinWidth = 100.;
 //initial date range selected on page load, computed one year from first date upon page load
-var init_date0, init_date1, dateRange = 365;
+var init_date0, init_date1;
 
 //====================================================================
 function init() {
@@ -268,11 +268,12 @@ function initCrossfilter() {
   var saveLevel = 0;
   var dateFormatForZoom = d3.time.format('%Y%m%d');
   var init_domain0 = dateFormatForZoom.parse("21000101"), init_domain1 = dateFormatForZoom.parse("2100101");
+  var resolnLimit = 260; //365; //Determines cutoff for month or day resoln (in days)
 
   //Determine date resolution of poiChart
   //http://stackoverflow.com/questions/23953019/dc-js-group-top5-not-working-in-chart
   function getDateGrouping() {
-    return fullRange < 365 ? poiDayGrouping : poiGrouping;
+    return fullRange < resolnLimit ? poiDayGrouping : poiGrouping;
   }
   var dateGroup = getDateGrouping();
 
@@ -298,18 +299,16 @@ function initCrossfilter() {
     .gap(10)
     .centerBar(false)
     //set filter brush rounding
-    .round(d3.time.day.round)
-    // //Subtract an hour from the minDate and add an hour to the maxDate to get an hour worth of 
-    // //padding on x-axis on each side of your min and max data.
-    // //http://stackoverflow.com/questions/31808718/dc-js-barchart-first-and-last-bar-not-displaying-fully
-    // //.x(d3.time.scale().domain([d3.time.hour.offset(minDate, -10), d3.time.hour.offset(maxDate, 10)]))
-    .x(d3.time.scale().domain(d3.extent(points, function(d) {
-      return d.dateRef; 
-    })))
-    // .xUnits(dc.units.fp.precision(24))
-    // //.x(d3.time.scale().domain([d3.time.hour.offset(minDate, 0), d3.time.hour.offset(maxDate, -2)]))
-    .xUnits(d3.time.hour)
-    .xUnits(dc.units.fp.precision(24))
+    //.round(d3.time.day.round)
+    .round(d3.time.month.round)
+    .x(d3.time.scale()
+      .domain(d3.extent(points, function(d) {
+        return d.dateRef; 
+      }))
+      //.rangeRound([0, 1 * 24])
+    )
+    //.xUnits(d3.time.months)
+    //.xUnits(function(){return 500;})
     .elasticY(true)
     .elasticX(false)
     .renderHorizontalGridLines(true)
@@ -318,9 +317,9 @@ function initCrossfilter() {
 
       zoomFlag = 1;
 
+      //If > 265, show dates in month resolution
       var deltaYear = ( chart.filter()[1] - chart.filter()[0] ) / ( 1000*60*60*24 ); //diff in days
-
-      //deltaYear = chart.filter()[1].getFullYear() - chart.filter()[0].getFullYear();
+      
       console.log("deltaYear: ", deltaYear)
 
       //if analysis period < 1 year, set poiChart in day grouping mode
@@ -328,21 +327,30 @@ function initCrossfilter() {
         chart.group(poiDayGrouping);
       }
 
-      //handle weird case where zoom is stuck at same deltaYear 
+      //handle weird case where zoom is stuck at same deltaYear and cannot zoom out further
       //while user keeps zooming out
       else if (saveLevel - deltaYear === 0) {
+        console.log("weird case: ", chart.filter())
         //only reset to default domain when no change in domain is happening at either ends
-        if (init_domain0.getTime() === chart.filters()[0][0].getTime() &&
-            init_domain1.getTime() === chart.filters()[0][1].getTime()) {
-          chart.x().domain(chart.xOriginalDomain());
+        if (init_domain0.getTime() === chart.filter()[0].getTime() &&
+            init_domain1.getTime() === chart.filter()[1].getTime()) {
+          chart.x().domain(chart.xOriginalDomain());         
+          chart.group(poiGrouping).round(d3.time.month.round);
+         
           // dc.refocusAll()
           // chart.filterAll();
           chart.render();
         }
-      } else if (deltaYear <= 365) {
-        chart.group(poiDayGrouping);
-      } else if (deltaYear > 365) {
-        chart.group(poiGrouping);
+      } else if (deltaYear <= resolnLimit) {
+        //chart.xUnits(d3.time.days);
+        chart.group(poiDayGrouping).round(d3.time.day.round);
+        //console.log("set to d3.time.days")
+        
+      } else if (deltaYear > resolnLimit) {
+        //console.log("set to d3.time.months")
+        //chart.xUnits(d3.time.months)
+        chart.group(poiGrouping).round(d3.time.day.round);
+        
       }
 
       //reset to current values for comparison with next iteration through zoom handler
