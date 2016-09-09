@@ -371,23 +371,36 @@ function initCrossfilter() {
         if (calendarFlag === 1) { //dates come from calendar
     
           changeTextboxDates(calendarDate0, calendarDate1);
-          calendarFlag = 0; //reset      
+          calendarFlag = 0; //reset
+
+          var dateDiff = ( poiChart.filter()[1] - poiChart.filter()[0] ) / ( 1000*60*60*24 ); //diff in days
+          if (dateDiff > resolnLimit) {
+            poiChart.group(poiGrouping).round(d3.time.month.round);
+          } else {
+            poiChart.group(poiDayGrouping).round(d3.time.day.round);
+          }
+
+          //Make sure x-axis contains selected dates
+          poiChart.x().domain([calendarDate0, calendarDate1]);
+          poiChart.render();
 
         } else {//dates to come from mouse zoom or sliding brush
-          //console.log("filter: ", poiChart.filter())
                 
           //Find date(s) in brush window
           //Adjust based on if > or < 12:00
           if (poiChart.filter()[0].getHours() > 12 && poiChart.filter()[0].getSeconds() > 0){
             start_day = shiftDay("addDay");
-          } else if (poiChart.filter()[0].getHours() < 12) {
+          } else if (poiChart.filter()[0].getHours() === 12){
             start_day = poiChart.filter()[0];
           }
+          else if (poiChart.filter()[0].getHours() < 12) {
+            start_day = poiChart.filter()[0];
+          }          
           console.log("start_day: ", start_day) 
  
           if (poiChart.filter()[1].getHours() < 12) {
             end_day = shiftDay("subtractDay");
-          } else if (poiChart.filter()[1].getHours() > 12) {
+          } else if (poiChart.filter()[1].getHours() >= 12) {
             end_day = poiChart.filter()[1];
           }
           console.log("end_day: ", end_day) 
@@ -397,7 +410,9 @@ function initCrossfilter() {
 
         } //end flag check for picking dates
         
+  
       } //end check of poiChart filters length
+
 
     } //end fn getBrushDates
 
@@ -409,12 +424,10 @@ function initCrossfilter() {
 
     function shiftDay(whichSign) {
       if (whichSign === "addDay") {
-        console.log("addDay")
         return new Date ( poiChart.filter()[0].getFullYear(),
                           poiChart.filter()[0].getMonth(),
                           (poiChart.filter()[0].getDate()+1) )
-      } else if (whichSign === "subtractDay") {
-        console.log("subtractDay")
+      } else if (whichSign === "subtractDay") {       
         return new Date ( poiChart.filter()[1].getFullYear(),
                           poiChart.filter()[1].getMonth(),
                           (poiChart.filter()[1].getDate()-1) )
