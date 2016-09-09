@@ -8,6 +8,7 @@ var decadeDimension;
 var decadeGrouping;
 
 var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
+var dataHour = "1200" //hour to set each dateRef to (default 00:00:00 GMT+0100)
 
 
 var dateFormat = d3.time.format('%Y%m%d%H%M');
@@ -42,16 +43,16 @@ function init() {
   //d3.tsv("test_span2months.json", function(data) {
   //d3.tsv("test_span2months_edit.json", function(data) {
     
-    var firstDate = data[0].dateRef + "1200"; //set time from midnight to noon
-    var lastDate = data[Object.keys(data).length - 1].dateRef + "1200";
+    var firstDate = data[0].dateRef + dataHour; //set time from midnight to noon
+    var lastDate = data[Object.keys(data).length - 1].dateRef + dataHour;
     minDate = dateFormat.parse(firstDate);
-    maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef + "1200");
+    maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef + dataHour);
 
     //Set initial date range to display
-    init_date0 = dateFormat.parse(data[0].dateRef + "1200");
+    init_date0 = dateFormat.parse(data[0].dateRef + dataHour);
     //Add one year to initial date. If > maxDate, use maxDate
-    if (dateFormat.parse(data[0].dateRef + "1200").addDays(365).getTime() < maxDate.getTime()) {
-      init_date1 = dateFormat.parse(data[0].dateRef + "1200").addDays(365);
+    if (dateFormat.parse(data[0].dateRef + dataHour).addDays(365).getTime() < maxDate.getTime()) {
+      init_date1 = dateFormat.parse(data[0].dateRef + dataHour).addDays(365);
     } else {
       init_date1 = maxDate;
     }
@@ -75,7 +76,7 @@ function init() {
     data.forEach(function(d, idx) {
 
       //set time from midnight to noon
-      d.dateRef = dateFormat.parse(d.dateRef + "1200"); //resolution = day
+      d.dateRef = dateFormat.parse(d.dateRef + dataHour); //resolution = day
       d.Dis = +d.Dis;
       d.Corr = +d.Corr;
 
@@ -189,60 +190,6 @@ function initCrossfilter() {
     });
   });
 
-  //--
-  //https://jqueryui.com/datepicker/#date-range
-  // $( function() {
-  //   $("#datepicker0").val(datepickerDateFormat(init_date0)).prop('disabled', false); //clear after page reload
-  //   $("#datepicker1").val(datepickerDateFormat(init_date1)).prop('disabled', false); //clear after page reload
-  //   var from = $( "#datepicker0" )
-  //       .datepicker({
-  //         defaultDate: "+1w",
-  //         changeMonth: true,
-  //         numberOfMonths: 3,
-  //         dateFormat: "dd/mm/yy",
-  //         showButtonPanel: true,
-  //         minDate: minDate,
-  //         maxDate: maxDate
-  //       })
-  //       .on( "change", function() {
-  //         to.datepicker( "option", "minDate", getCalendarDate( this ) );
-  //         useManualDates();
-  //       }),
-  //     to = $( "#datepicker1" ).datepicker({
-  //       defaultDate: "+1w",
-  //       changeMonth: true,
-  //       numberOfMonths: 3,
-  //       showButtonPanel: true,
-  //       dateFormat: "dd/mm/yy",
-  //       minDate: minDate,
-  //       maxDate: maxDate
-  //     })
-  //     .on( "change", function() {
-  //       console.log("this: ", this)
-  //       from.datepicker( "option", "maxDate", getCalendarDate( this ) );
-  //       useManualDates();
-  //     });
-  //     // .on("keypress", function() {
-  //     //   console.log("keypress")
-  //     // })
-  //     // .on('click', function() {
-  //     //   //d3.select("#ui-datepicker-div").style("display", "block");
-  //     //   from.datepicker( "option", "maxDate", getCalendarDate( this ) );
-  //     // });
- 
-  //   function getCalendarDate( element ) {
-  //     var date;
-  //     try {
-  //       date = $.datepicker.parseDate( "dd/mm/yy", element.value );
-  //     } catch( error ) {
-  //       date = null;
-  //     }
- 
-  //     return date;
-  //   }
-  // } );
-  //--
-
   //Activate calendar popup in case closed by invalid date selection
   $("#datepicker0").on('click', function() {
     d3.select("#ui-datepicker-div").style("display", "block");
@@ -268,11 +215,6 @@ function initCrossfilter() {
     var d0 = makeDateObj($("#datepicker0")),
         d1 = makeDateObj($("#datepicker1"));
 
-    if (d0 < minDate) {
-      console.log("d0: ", d0)
-      console.log("minDate: ", minDate)
-    }    
-
     var diffDate = ( d1 - d0 ) / ( 1000*60*60*24 ); //diff in days
     if (diffDate < 0) {
       alert("End Date is earlier than Start Date");
@@ -289,8 +231,8 @@ function initCrossfilter() {
     }
 
     //Offset by 2h on either side of brush
-    d0.setHours(10);
-    d1.setHours(14);
+    // d0.setHours(10);
+    // d1.setHours(14);
 
     //global vars read by getBrushDates()
     calendarFlag = 1;
@@ -314,7 +256,7 @@ function initCrossfilter() {
 
   function makeDateObj(dateRaw) {
     var dateString = dateRaw.val().split("/");
-    var dateStringFormat = dateString[2] + dateString[1] + dateString[0] + "1200";
+    var dateStringFormat = dateString[2] + dateString[1] + dateString[0] + dataHour;
     dateObj = dateFormat.parse(dateStringFormat);
 
     return dateObj;
@@ -337,8 +279,8 @@ function initCrossfilter() {
   //Set time for brush (10:00 to capture first date in brush window, 
   //14:00 to capture last date in window)
   //CANNOT do this in RangedFilter
-  minDate.setHours(10);
-  init_date1.setHours(14);
+  // minDate.setHours(10);
+  // init_date1.setHours(14);
   poiChart
     .width(780)
     .height(200)
@@ -348,18 +290,26 @@ function initCrossfilter() {
       bottom: 30,
       left: 40
     })
-    .mouseZoomable(true)
-    //.brushOn(false)    
+    .mouseZoomable(true)  
     .dimension(poiDimension)                
     .group(dateGroup)                
     .transitionDuration(500)
-    .centerBar(true)
     .filter(dc.filters.RangedFilter(minDate, init_date1))
     .gap(10)
-    //Subtract an hour from the minDate and add an hour to the maxDate to get an hour worth of 
-    //padding on x-axis on each side of your min and max data.
-    //http://stackoverflow.com/questions/31808718/dc-js-barchart-first-and-last-bar-not-displaying-fully
-    .x(d3.time.scale().domain([d3.time.hour.offset(minDate, -10), d3.time.hour.offset(maxDate, 10)]))
+    .centerBar(false)
+    //set filter brush rounding
+    .round(d3.time.day.round)
+    // //Subtract an hour from the minDate and add an hour to the maxDate to get an hour worth of 
+    // //padding on x-axis on each side of your min and max data.
+    // //http://stackoverflow.com/questions/31808718/dc-js-barchart-first-and-last-bar-not-displaying-fully
+    // //.x(d3.time.scale().domain([d3.time.hour.offset(minDate, -10), d3.time.hour.offset(maxDate, 10)]))
+    .x(d3.time.scale().domain(d3.extent(points, function(d) {
+      return d.dateRef; 
+    })))
+    // .xUnits(dc.units.fp.precision(24))
+    // //.x(d3.time.scale().domain([d3.time.hour.offset(minDate, 0), d3.time.hour.offset(maxDate, -2)]))
+    .xUnits(d3.time.hour)
+    .xUnits(dc.units.fp.precision(24))
     .elasticY(true)
     .elasticX(false)
     .renderHorizontalGridLines(true)
@@ -368,7 +318,10 @@ function initCrossfilter() {
 
       zoomFlag = 1;
 
-      deltaYear = chart.filter()[1].getFullYear() - chart.filter()[0].getFullYear();
+      var deltaYear = ( chart.filter()[1] - chart.filter()[0] ) / ( 1000*60*60*24 ); //diff in days
+
+      //deltaYear = chart.filter()[1].getFullYear() - chart.filter()[0].getFullYear();
+      console.log("deltaYear: ", deltaYear)
 
       //if analysis period < 1 year, set poiChart in day grouping mode
       if (deltaYear === 0) {
@@ -386,13 +339,16 @@ function initCrossfilter() {
           // chart.filterAll();
           chart.render();
         }
-      } else if (deltaYear < 3) {
+      } else if (deltaYear <= 365) {
         chart.group(poiDayGrouping);
-      } else if (deltaYear > 3) {
+      } else if (deltaYear > 365) {
         chart.group(poiGrouping);
       }
 
       //reset to current values for comparison with next iteration through zoom handler
+      // chart.filter()[1].setHours(12);
+      // chart.filter()[1].setMinutes(0);
+      // chart.filter()[1].setSeconds(0);
       saveLevel = deltaYear;
       init_domain0 = chart.filter()[0];
       init_domain1 = chart.filter()[1];
