@@ -33,6 +33,28 @@ var init_date0, init_date1;
 
 //====================================================================
 function init() {
+  //read config file
+  d3.text("config_test.txt", function(text) {
+    text_array = d3.csv.parseRows(text);
+
+    //Parameters to display in html
+    varname = text_array[10].toString().split("=").pop();
+    nanalog = text_array[13].toString().split("=").pop();
+    simsource = text_array[21].toString().split("=").pop();
+    archivesource = text_array[23].toString().split("=").pop();
+    bbox = text_array[25].toString().split("=").pop();
+
+    startdate = text_array[24].toString().split("=").pop().split(",").splice(0)[0] + '"';
+    enddate = '"' + text_array[24].toString().split("=").pop().split(",").splice(0)[1];
+    
+    $(".content .value-nanalog").html(nanalog);
+    $(".content .value-varname").html(varname);
+    $(".content .value-simsource").html(simsource);
+    $(".content .value-archivesource").html(archivesource);
+    $(".content .value-bbox").html(bbox);
+    $(".value-sdate").html(startdate);
+    $(".value-edate").html(enddate);
+  });
 
   //http://birdhouse-lsce.extra.cea.fr:8090/wpsoutputs/flyingpigeon/analogs-73cd782c-74f4-11e6-bf5f-f73f2a3d7e35.txt
   d3.tsv("test_gt1yr_birdhouse.json", function(data) {
