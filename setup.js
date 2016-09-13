@@ -45,8 +45,15 @@ function init() {
     archivesource = text_array[23].toString().split("=").pop();
     bbox = text_array[25].toString().split("=").pop();
 
-    startdate = text_array[24].toString().split("=").pop().split(",").splice(0)[0] + '"';
-    enddate = '"' + text_array[24].toString().split("=").pop().split(",").splice(0)[1];
+
+    startdate = text_array[24][0].split('= "')[1];
+    startdate = startdate.slice(8,10) + "/" + startdate.slice(5,7) + "/" + startdate.slice(0,4);
+  
+    enddate = text_array[24][1];
+    enddate = enddate.slice(8,10) + "/" + enddate.slice(5,7) + "/" + enddate.slice(0,4);
+
+    console.log(enddate)
+   
     
     $(".content .value-nanalog").html(nanalog);
     $(".content .value-varname").html(varname);
