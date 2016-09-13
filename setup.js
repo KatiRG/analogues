@@ -34,7 +34,8 @@ var init_date0, init_date1;
 //====================================================================
 function init() {
   //read config file
-  d3.text("config_test.txt", function(text) {
+  //d3.text("config_test.txt", function(text) {
+  d3.text("config_test_11anlgs.txt", function(text) {
     text_array = d3.csv.parseRows(text);
 
     //Parameters to display in html
@@ -56,8 +57,11 @@ function init() {
     $(".value-edate").html(enddate);
   });
 
+  //http://localhost:8090/wpsoutputs/flyingpigeon/analogs-12f189be-79a7-11e6-b7f7-e7ff4fd8b248.txt
+  d3.tsv("test_11anlgs.json", function(data) {
+
   //http://birdhouse-lsce.extra.cea.fr:8090/wpsoutputs/flyingpigeon/analogs-73cd782c-74f4-11e6-bf5f-f73f2a3d7e35.txt
-  d3.tsv("test_gt1yr_birdhouse.json", function(data) {
+  //d3.tsv("test_gt1yr_birdhouse.json", function(data) {
   //d3.tsv("test_gt1yr_birdhouse_03Jan2013.json", function(data) {
 
   //d3.tsv("test2_edit.json", function(data) {

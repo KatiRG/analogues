@@ -1,0 +1,27 @@
+!Configuration file for flyingpigeon analogs process
+!Created : 20160913_134248 
+!Version : 0.1 
+&FILES 
+ my_files%archivefile = "/homel/cnangini/.conda/envs/birdhouse/var/tmp/pywps-instanceptvfzp/31c5c4cc-79a7-11e6-88fc-295566a6c666.nc" 
+ my_files%simulationfile = "/homel/cnangini/.conda/envs/birdhouse/var/tmp/pywps-instanceptvfzp/31d78d92-79a7-11e6-88fc-295566a6c666.nc" 
+ my_files%outputfile = "/homel/cnangini/.conda/envs/birdhouse/var/tmp/pywps-instanceptvfzp/tmp6Jc4Qp.txt" 
+/ 
+&PARAM 
+ my_params%timewin = 1 
+ my_params%varname = "slp" 
+ my_params%seacyc = .TRUE. 
+ my_params%cycsmooth = 91 
+ my_params%nanalog = 11 
+ my_params%seasonwin = 30 
+ my_params%distfun = "euclidean" 
+ my_params%calccor = .TRUE. 
+ my_params%oformat = ".txt" 
+ my_params%silent = .FALSE.
+/
+&ATTS
+ my_atts%simsource = "NCEP" 
+my_atts%predictorvar = "slp" 
+my_atts%archisource = "NCEP" 
+my_atts%archiperiod = "2013-01-01,2014-12-31" 
+my_atts%predictordom = "-80.0,50.0,22.5,70.0" 
+/
