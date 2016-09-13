@@ -46,22 +46,19 @@ function init() {
     bbox = text_array[25].toString().split("=").pop();
 
 
-    startdate = text_array[24][0].split('= "')[1];
-    startdate = startdate.slice(8,10) + "/" + startdate.slice(5,7) + "/" + startdate.slice(0,4);
+    startref = text_array[24][0].split('= "')[1];
+    startref = startref.slice(8,10) + "/" + startref.slice(5,7) + "/" + startref.slice(0,4);
   
-    enddate = text_array[24][1];
-    enddate = enddate.slice(8,10) + "/" + enddate.slice(5,7) + "/" + enddate.slice(0,4);
-
-    console.log(enddate)
-   
+    endref = text_array[24][1];
+    endref = endref.slice(8,10) + "/" + endref.slice(5,7) + "/" + endref.slice(0,4);
     
     $(".content .value-nanalog").html(nanalog);
     $(".content .value-varname").html(varname);
     $(".content .value-simsource").html(simsource);
     $(".content .value-archivesource").html(archivesource);
     $(".content .value-bbox").html(bbox);
-    $(".value-sdate").html(startdate);
-    $(".value-edate").html(enddate);
+    $(".value-ref").html(startref + " - " + endref);
+    
   });
 
   //http://localhost:8090/wpsoutputs/flyingpigeon/analogs-12f189be-79a7-11e6-b7f7-e7ff4fd8b248.txt
@@ -81,6 +78,9 @@ function init() {
     var lastDate = data[Object.keys(data).length - 1].dateRef + dataHour;
     minDate = dateFormat.parse(firstDate);
     maxDate = dateFormat.parse(data[Object.keys(data).length - 1].dateRef + dataHour);
+
+    $(".value-sdate").html(datepickerDateFormat(minDate));
+    $(".value-edate").html(datepickerDateFormat(maxDate));
 
     //Set initial date range to display
     init_date0 = dateFormat.parse(data[0].dateRef + dataHour);
