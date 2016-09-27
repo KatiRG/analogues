@@ -35,23 +35,42 @@ var init_date0, init_date1;
 function init() {
   //read config file
   //d3.text("config_test.txt", function(text) {
-  d3.text("config_test_11anlgs.txt", function(text) {
+  //config_ana_slp_surface__rms_NA_sim_1948-01-01_2016-09-19_base_1948-01-01_2016-09-19_-80.0_50.0_22.5_70.0_1_30_20.txt
+  //d3.text("config_test_11anlgs.txt", function(text) {
+  d3.text("config_ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.txt", function(text) {    
     text_array = d3.csv.parseRows(text);
 
-    //Parameters to display in html
-    varname = text_array[10].toString().split("=").pop();
-    nanalog = text_array[13].toString().split("=").pop();
-    simsource = text_array[21].toString().split("=").pop();
-    archivesource = text_array[23].toString().split("=").pop();
-    bbox = text_array[25].toString().split("=").pop();
+    //Find element containing param string
+    for (idx = 0; idx < text_array.length; idx++) {
+      t = text_array[idx].toString();
+          
+      if (t.indexOf('outputfile') != -1) idx_outputfile = idx;
+      if (t.indexOf('nanalog') != -1) idx_nanalog = idx;
+      if (t.indexOf('varname') != -1) idx_varname = idx;
+      if (t.indexOf('simsource') != -1) idx_simsource = idx;
+      if (t.indexOf('archisource') != -1) idx_archivesource = idx;
+      if (t.indexOf('predictordom') != -1) idx_bbox = idx;
+      if (t.indexOf('archiperiod') != -1) idx_refperiod = idx;
+    }
 
-
-    startref = text_array[24][0].split('= "')[1];
-    startref = startref.slice(8,10) + "/" + startref.slice(5,7) + "/" + startref.slice(0,4);
+    //Parameters to display in html (find by string match)
+    outputfile = text_array[idx_outputfile].toString().split("=").pop();
+    nanalog = text_array[idx_nanalog].toString().split("=").pop();
+    varname = text_array[idx_varname].toString().split("=").pop();
+    simsource = text_array[idx_simsource].toString().split("=").pop();
+    archivesource = text_array[idx_archivesource].toString().split("=").pop();
+    bbox = text_array[idx_bbox].toString().split("=").pop();
+        
+    startref = text_array[idx_refperiod][0].split('= "')[1];
+    if (startref != "dummy")
+      startref = startref.slice(8,10) + "/" + startref.slice(5,7) + "/" + startref.slice(0,4);
   
-    endref = text_array[24][1];
-    endref = endref.slice(8,10) + "/" + endref.slice(5,7) + "/" + endref.slice(0,4);
-    
+    endref = text_array[idx_refperiod][1];
+    if (endref.indexOf("dummy") === -1)
+      endref = endref.slice(8,10) + "/" + endref.slice(5,7) + "/" + endref.slice(0,4);
+    else endref = "dummy";
+        
+    $(".content .value-outputfile").html(outputfile);
     $(".content .value-nanalog").html(nanalog);
     $(".content .value-varname").html(varname);
     $(".content .value-simsource").html(simsource);
@@ -62,7 +81,9 @@ function init() {
   });
 
   //http://localhost:8090/wpsoutputs/flyingpigeon/analogs-12f189be-79a7-11e6-b7f7-e7ff4fd8b248.txt
-  d3.tsv("test_11anlgs.json", function(data) {
+  //config_ana_slp_surface__rms_NA_sim_1948-01-01_2016-09-19_base_1948-01-01_2016-09-19_-80.0_50.0_22.5_70.0_1_30_20.txt
+  //d3.tsv("test_11anlgs.json", function(data) {
+  d3.tsv("ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.json", function(data) {  
 
   //http://birdhouse-lsce.extra.cea.fr:8090/wpsoutputs/flyingpigeon/analogs-73cd782c-74f4-11e6-bf5f-f73f2a3d7e35.txt
   //d3.tsv("test_gt1yr_birdhouse.json", function(data) {
