@@ -491,8 +491,8 @@ function initCrossfilter() {
   //-----------------------------------
   seasonsChart
     .width(5)
-    .height(85)
-    .radius(30)
+    .height(100)
+    .radius(45)
     .slicesCap(4)
     .innerRadius(5)
     .colors(seasonColours) //DJF, JJA, MAM, SON  
