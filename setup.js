@@ -395,13 +395,13 @@ function initCrossfilter() {
       } else if (deltaYear <= resolnLimit) {
         //chart.xUnits(d3.time.days);
         chart.group(poiDayGrouping).round(d3.time.day.round);
-        //console.log("set to d3.time.days")
+        // console.log("set width")
+        // chart.xUnits(d3.time.days);
         
       } else if (deltaYear > resolnLimit) {
         //console.log("set to d3.time.months")
         //chart.xUnits(d3.time.months)
         chart.group(poiGrouping).round(d3.time.month.round);
-        
       }
 
       //reset to current values for comparison with next iteration through zoom handler
