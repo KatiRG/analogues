@@ -46,32 +46,9 @@
   fill: #333;
 }
 
-#chart-depth .brush rect.extent {
-  fill: #2EA3DB;
-  fill-opacity: .25;
-}
-
-#chart-age .brush rect.extent {
-  fill: #F5B441;
-  fill-opacity: .25;
-}
-
 .brush .resize path {
   fill: #eee;
   stroke: #666;
-}
-
-#map-div {
-  height: 512px;
-}
-
-#proxiesListTitle {
-  font-weight: normal;
-  background: #ddd;
-  font-style: italic;
-  padding-right: 30px;
-  color: #333;
-  white-space: nowrap;
 }
 
 .dc-chart-title {
@@ -87,26 +64,22 @@
   text-align: left;
 }
 
-.proxyItem {
-  line-height: 1.2em;
-  background: #eee;
-  margin-bottom: 1px;
-  color: #333;
-}
-
-.proxyItem div {
-  display: inline-block;
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: top;
-}
-
 .imghelp {
   border-radius: 10px;
-} 
+}
 
-.symbol {
-  opacity: 0.8;
+#message {
+  font-size: 26px;
+  font-weight: bold;
+  color: #716450;
+  border: 2px solid #787A76;
+  padding: 15px;
+  background-color: #D2C1A8;
+  border-radius: 25px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -50px;
+  margin-left: -100px;
+  z-index: 10;
 }
