@@ -76,7 +76,7 @@ function init() {
     $(".content .value-simsource").html(simsource);
     $(".content .value-archivesource").html(archivesource);
     $(".content .value-bbox").html(bbox);
-    $(".value-ref").html(startref + " - " + endref);
+    $(".value-ref").html(startref + " &ndash; " + endref);
     
   });
 
@@ -321,8 +321,12 @@ function initCrossfilter() {
   var currentGranularity = 'month';
   var saveLevel = 0;
   var dateFormatForZoom = d3.time.format('%Y%m%d');
-  var init_domain0 = dateFormatForZoom.parse("21000101"), init_domain1 = dateFormatForZoom.parse("2100101");
+  var init_domain0 = dateFormatForZoom.parse("21000101"), 
+      init_domain1 = dateFormatForZoom.parse("2100101");
   var resolnLimit = 260; //365; //Determines cutoff for month or day resoln (in days)
+
+  $(".content .value-resolnLimit").html("For periods &ge; " + resolnLimit + 
+    " days, bars show monthly sum of analogues. Otherwise, the bars show the daily analogue count.");
 
   //Determine date resolution of poiChart
   //http://stackoverflow.com/questions/23953019/dc-js-group-top5-not-working-in-chart
@@ -509,7 +513,8 @@ function initCrossfilter() {
     //     //if (d.value != 0) return 0.25;
     //     return 0.25;
     // });
-
+  
+  //Show season string instead of number in reset display
   seasonsChart.filterPrinter(function(filters) { 
     return filters.map(function(key) { return seasons[key]; }).join(', '); 
   })
