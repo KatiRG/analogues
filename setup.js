@@ -216,11 +216,11 @@ function initCrossfilter() {
         if(p.count>1)
           p.var = p.count; //(p.count - 2) * p.var / (p.count - 1) + da*da/p.count;
         p.stddev = Math.sqrt(p.var);
-      
+        return p;
       }, function() {
-          return {count: 0, var: 0}
+        return {count: 0, var: 0}
       });
-  var endwid = 5;
+  var endwid = 3;
 
   //-----------------------------------  
   corrDimension = filter.dimension(function(d) {
@@ -479,14 +479,14 @@ function initCrossfilter() {
           else if (poiChart.filter()[0].getHours() < 12) {
             start_day = poiChart.filter()[0];
           }          
-          console.log("start_day: ", start_day) 
+          //console.log("start_day: ", start_day) 
  
           if (poiChart.filter()[1].getHours() < 12) {
             end_day = shiftDay("subtractDay");
           } else if (poiChart.filter()[1].getHours() >= 12) {
             end_day = poiChart.filter()[1];
           }
-          console.log("end_day: ", end_day) 
+          //console.log("end_day: ", end_day) 
 
           //Update date display in calendar text boxes
           changeTextboxDates(start_day, end_day);
@@ -546,7 +546,6 @@ function initCrossfilter() {
 
   //-----------------------------------
   decadeChart
-    //.margins({top: 10, right: 10, bottom: 30, left: 10})
     .dimension(decadeDimension)
     .group(avgStddevGroup)
     .valueAccessor(function(kv) {
@@ -558,30 +557,73 @@ function initCrossfilter() {
     })
     .on('renderlet', function(chart) {
       var barHeight = chart.select('g.row rect').attr('height');
-      console.log(barHeight);
-      var ebar = chart.selectAll('g.row')
-       .append('g')
+
+      //find y-coord of each bar and save to array
+      var currenty = [];  
+      for (var idx=0; idx < d3.selectAll("g.row").size() ; ++idx) {
+        var my_g = my_g = d3.select("g.row._" + idx)
+        currenty.push(d3.transform(my_g.attr("transform")).translate[1]);
+      }
+
+      //create errorbar nodes
+      var bar = chart.select("g").selectAll('g.errorbar')
+      .data(chart.data())
+      .enter()
+        .append('g')
         .attr('class', 'errorbar');
-      ebar
+      bar
         .append('line')
         .attr({
-          'stroke-width': 1,
-          stroke: '#b1b5c8', //556270, #B79FA3, b1b5c8, baa7b0
+          'stroke-width': 1.5,
+          stroke: '#b1b5c8',
           x1: function(d) {
-            console.log("d: ", d)
             return chart.x()(d.value.count - d.value.stddev);
           },
-          y1: function(d) {
-            console.log("barHeight in here: ", barHeight)
-            return barHeight/2;
+          y1: function(d, idx) {
+            return currenty[idx] + barHeight/2;
           },
           x2: function(d) {
             return chart.x()(d.value.count + d.value.stddev);
           },
-          y2: function(d) {
-            return  barHeight/2;
+          y2: function(d, idx) {
+            return currenty[idx] + barHeight/2;
           }
         });
+      bar.append('line')
+        .attr({
+          'stroke-width': 1,
+          stroke: '#b1b5c8',
+          x1: function(d) {
+            return chart.x()(d.value.count - d.value.stddev);
+          },
+          y1: function(d, idx) {
+            return currenty[idx] + barHeight/2 - endwid;
+          },
+          x2: function(d) {
+            return chart.x()(d.value.count - d.value.stddev);
+          },
+          y2: function(d, idx) {
+            return currenty[idx] + barHeight/2 + endwid;
+          }
+        });
+      bar.append('line')
+        .attr({
+          'stroke-width': 1,
+          stroke: '#b1b5c8',
+          x1: function(d) {
+            return chart.x()(d.value.count + d.value.stddev);
+          },
+          y1: function(d, idx) {
+            return currenty[idx] + barHeight/2 - endwid;
+          },
+          x2: function(d) {
+            return chart.x()(d.value.count + d.value.stddev);
+          },
+          y2: function(d, idx) {
+            return currenty[idx] + barHeight/2 + endwid;
+          }
+        });
+
       })
     .colors(decadeColours)
     .elasticX(true)
