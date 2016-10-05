@@ -6,6 +6,7 @@ var poiDimension;
 var poiGrouping;
 var decadeDimension;
 var decadeGrouping;
+var avgStddevGroup;
 
 var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
 var dataHour = "1200" //hour to set each dateRef to (default 00:00:00 GMT+0100)
@@ -91,10 +92,10 @@ function init() {
 
   //d3.tsv("test2_edit.json", function(data) {
   //d3.tsv("test_gt1yr.json", function(data) {
-  d3.tsv("modified-analogfileyODtII.tsv", function(data) {
   //d3.tsv("test_span2months.json", function(data) {
   //d3.tsv("test_span2months_edit.json", function(data) {
-    
+  d3.tsv("modified-analogfileyODtII.tsv", function(data) { //multiple decades
+
     var firstDate = data[0].dateRef + dataHour; //set time from midnight to noon
     var lastDate = data[Object.keys(data).length - 1].dateRef + dataHour;
     minDate = dateFormat.parse(firstDate);
@@ -197,6 +198,30 @@ function initCrossfilter() {
   });
   decadeGrouping = decadeDimension.group();
 
+  //Errorbars for rowChart
+  //http://jsfiddle.net/gordonwoodhull/yrugrbhq/17/
+  //http://labs.physics.dur.ac.uk/skills/skills/poisson.php
+  avgStddevGroup = decadeDimension.group().reduce(
+      function(p, v) {
+        ++p.count;
+        
+        if(p.count>1)
+          p.var = p.count; //(p.count - 2) * p.var / (p.count - 1) + da*da/p.count;
+        p.stddev = Math.sqrt(p.var);
+        return p;
+      }, function(p, v) {
+        // exercise for the reader
+        --p.count;
+        
+        if(p.count>1)
+          p.var = p.count; //(p.count - 2) * p.var / (p.count - 1) + da*da/p.count;
+        p.stddev = Math.sqrt(p.var);
+      
+      }, function() {
+          return {count: 0, var: 0}
+      });
+  var endwid = 5;
+
   //-----------------------------------  
   corrDimension = filter.dimension(function(d) {
     return d.Corr;
@@ -213,6 +238,7 @@ function initCrossfilter() {
   poiChart  = dc.barChart("#chart-poi");
   seasonsChart = dc.pieChart("#chart-seasons");
   decadeChart  = dc.rowChart("#chart-decade");
+  errorChart  = dc.rowChart("#chart-error");
   corrChart = dc.barChart("#chart-corr");
   disChart = dc.barChart("#chart-dis");
 
@@ -529,6 +555,51 @@ function initCrossfilter() {
     .title(function (p) {
       return p.key +": "+ p.value +" analogues";
     })    
+    .colors(decadeColours)
+    .elasticX(true)
+    .gap(2)
+    .xAxis().ticks(4);
+
+  errorChart
+    .width(380)
+    .height(200)
+    //.margins({top: 10, right: 10, bottom: 30, left: 10})
+    .dimension(decadeDimension)
+    .group(avgStddevGroup)
+    .valueAccessor(function(kv) {
+      console.log(kv)
+      return kv.value.count;
+    })
+    .title(function (p) {
+      return p.key +": "+ p.value.count +" analogues";
+    })
+    .on('renderlet', function(chart) {
+      var barHeight = chart.select('g.row rect').attr('height');
+      console.log(barHeight);
+      var ebar = chart.selectAll('g.row')
+       .append('g')
+        .attr('class', 'errorbar');
+      ebar
+        .append('line')
+        .attr({
+          'stroke-width': 1,
+          stroke: '#B79FA3',
+          x1: function(d) {
+            console.log("d: ", d)
+            return chart.x()(d.value.count - d.value.stddev);
+          },
+          y1: function(d) {
+            console.log("barHeight in here: ", barHeight)
+            return barHeight/2;
+          },
+          x2: function(d) {
+            return chart.x()(d.value.count + d.value.stddev);
+          },
+          y2: function(d) {
+            return  barHeight/2;
+          }
+        });
+      })
     .colors(decadeColours)
     .elasticX(true)
     .gap(2)
