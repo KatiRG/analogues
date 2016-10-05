@@ -16,6 +16,27 @@ var dateFormat = d3.time.format('%Y%m%d%H%M');
 var datepickerDateFormat = d3.time.format('%d/%m/%Y'); //for display in calendar text boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
 
+//for errorbar calculation
+var decade1948_0 = new Date(1948,01,01), decade1948_1 = new Date(1955,12,31);
+var decade1956_0 = new Date(1956,01,01), decade1956_1 = new Date(1965,12,31);
+var decade1966_0 = new Date(1966,01,01), decade1966_1 = new Date(1975,12,31);
+var decade1976_0 = new Date(1976,01,01), decade1976_1 = new Date(1985,12,31);
+var decade1986_0 = new Date(1986,01,01), decade1986_1 = new Date(1995,12,31);
+var decade1996_0 = new Date(1996,01,01), decade1996_1 = new Date(2005,12,31);
+var decade2006_0 = new Date(2006,01,01), decade2006_1 = new Date(2015,12,31);
+
+var N_1948 = getN(decade1948_0, decade1948_1)
+var N_1956 = getN(decade1956_0, decade1956_1)
+var N_1966 = getN(decade1966_0, decade1966_1)
+var N_1976 = getN(decade1976_0, decade1976_1)
+var N_1986 = getN(decade1986_0, decade1986_1)
+var N_1996 = getN(decade1996_0, decade1996_1)
+var N_2006 = getN(decade2006_0, decade2006_1)
+
+function getN(date0, date1) {
+  return Math.round(Math.abs((date0.getTime() - date1.getTime())/(day)));
+}
+
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
     .range(["#67739F", "#67739F", "#67739F", "#67739F", "#B1CEF5", 
@@ -201,24 +222,31 @@ function initCrossfilter() {
   //Errorbars for rowChart
   //http://jsfiddle.net/gordonwoodhull/yrugrbhq/17/
   //http://labs.physics.dur.ac.uk/skills/skills/poisson.php
+  factor_indep = Math.sqrt(5); //to handle that events are not independent
   avgStddevGroup = decadeDimension.group().reduce(
       function(p, v) {
         ++p.count;
         
         if(p.count>1)
-          p.var = p.count; //(p.count - 2) * p.var / (p.count - 1) + da*da/p.count;
+          p.var = p.count;
         p.stddev = Math.sqrt(p.var);
+        p.erN_1948 = Math.sqrt(p.count/N_1948);
         return p;
       }, function(p, v) {
         // exercise for the reader
         --p.count;
         
         if(p.count>1)
-          p.var = p.count; //(p.count - 2) * p.var / (p.count - 1) + da*da/p.count;
+          p.var = p.count;
         p.stddev = Math.sqrt(p.var);
+        p.erN_1948 = Math.sqrt(p.count/N_1948);
         return p;
       }, function() {
-        return {count: 0, var: 0}
+        return {count: 0, var: 0, 
+          erN_1948: 0, erN_1956:0, erN_1966: 0, 
+          erN_1976: 0, erN_1986: 0, erN_1996: 0,
+          erN_2006: 0
+        }
       });
   var endwid = 3;
 
@@ -550,7 +578,7 @@ function initCrossfilter() {
     .dimension(decadeDimension)
     .group(avgStddevGroup)
     .valueAccessor(function(kv) {
-      //console.log(kv)
+      console.log(kv)
       return kv.value.count;
     })
     .title(function (p) {
@@ -562,16 +590,11 @@ function initCrossfilter() {
 
       var barHeight = chart.select('g.row rect').attr('height');
 
-      //find y-coord of each bar and save to array
-      var currenty = [];  
-      for (var idx=0; idx < d3.selectAll("g.row").size() ; ++idx) {
-        var my_g = my_g = d3.select("g.row._" + idx)
-        currenty.push(d3.transform(my_g.attr("transform")).translate[1]);
-      }
-
       var ebar = chart.selectAll('g.row')
        .append('g')
-        .attr('class', 'errorbar');
+        .attr('class', function(d) {
+          return 'decade' +d.key + ' errorbar';
+        });
       ebar
         .append('line')
         .attr({
@@ -579,7 +602,19 @@ function initCrossfilter() {
           stroke: errorbarColour,
           x1: function(d) {
             //console.log("d: ", d)
-            return chart.x()(d.value.count - d.value.stddev);
+            console.log("this parentNode: ", d3.select(this.parentNode)[0][0])
+            console.log("this.parentNode: ", this.parentNode.__data__.key)
+            var decade = this.parentNode.__data__.key;
+            if (decade = "1948-1955") er_decade = d.value.erN_1948;
+            else if (decade = "1956-1965") er_decade = d.value.erN_1956;
+            else if (decade = "1966-1975") er_decade = d.value.erN_1966;
+            else if (decade = "1976-1985") er_decade = d.value.erN_1976;
+            else if (decade = "1986-1995") er_decade = d.value.erN_1986;
+            else if (decade = "1996-2005") er_decade = d.value.erN_1996;
+            else if (decade = "2006-2015") er_decade = d.value.erN_2006;
+            
+            //return chart.x()(d.value.count - d.value.stddev);
+            return chart.x()(d.value.count - er_decade);
           },
           y1: function(d) {
             return barHeight/2;
