@@ -238,7 +238,6 @@ function initCrossfilter() {
   poiChart  = dc.barChart("#chart-poi");
   seasonsChart = dc.pieChart("#chart-seasons");
   decadeChart  = dc.rowChart("#chart-decade");
-  errorChart  = dc.rowChart("#chart-error");
   corrChart = dc.barChart("#chart-corr");
   disChart = dc.barChart("#chart-dis");
 
@@ -547,22 +546,6 @@ function initCrossfilter() {
 
   //-----------------------------------
   decadeChart
-    .width(380)
-    .height(200)
-    //.margins({top: 10, right: 10, bottom: 30, left: 10})
-    .dimension(decadeDimension)
-    .group(decadeGrouping)
-    .title(function (p) {
-      return p.key +": "+ p.value +" analogues";
-    })    
-    .colors(decadeColours)
-    .elasticX(true)
-    .gap(2)
-    .xAxis().ticks(4);
-
-  errorChart
-    .width(380)
-    .height(200)
     //.margins({top: 10, right: 10, bottom: 30, left: 10})
     .dimension(decadeDimension)
     .group(avgStddevGroup)
@@ -583,7 +566,7 @@ function initCrossfilter() {
         .append('line')
         .attr({
           'stroke-width': 1,
-          stroke: '#B79FA3',
+          stroke: '#b1b5c8', //556270, #B79FA3, b1b5c8, baa7b0
           x1: function(d) {
             console.log("d: ", d)
             return chart.x()(d.value.count - d.value.stddev);
