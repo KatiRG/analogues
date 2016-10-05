@@ -82,7 +82,7 @@ function init() {
 
   //http://localhost:8090/wpsoutputs/flyingpigeon/analogs-12f189be-79a7-11e6-b7f7-e7ff4fd8b248.txt
   //config_ana_slp_surface__rms_NA_sim_1948-01-01_2016-09-19_base_1948-01-01_2016-09-19_-80.0_50.0_22.5_70.0_1_30_20.txt
-  d3.tsv("test_11anlgs.json", function(data) {
+  //d3.tsv("test_11anlgs.json", function(data) {
   //d3.tsv("ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.json", function(data) {  
 
   //http://birdhouse-lsce.extra.cea.fr:8090/wpsoutputs/flyingpigeon/analogs-73cd782c-74f4-11e6-bf5f-f73f2a3d7e35.txt
@@ -91,7 +91,7 @@ function init() {
 
   //d3.tsv("test2_edit.json", function(data) {
   //d3.tsv("test_gt1yr.json", function(data) {
-  //d3.tsv("modified-analogfileyODtII.tsv", function(data) {
+  d3.tsv("modified-analogfileyODtII.tsv", function(data) {
   //d3.tsv("test_span2months.json", function(data) {
   //d3.tsv("test_span2months_edit.json", function(data) {
     
