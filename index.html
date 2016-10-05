@@ -1,46 +1,36 @@
 <!DOCTYPE html>
 <html>
-<!--
- ##########################################################################
- Patrick.Brockmann@lsce.ipsl.fr
- PLEASE DO NOT COPY OR DISTRIBUTE WITHOUT PERMISSION
- ##########################################################################
--->
+  <head>
+    <meta charset="utf-8">
+    <title>Analogues Viewer</title>
 
-<head>
-  <meta charset="utf-8">
-  <title>Analogues Viewer</title>
+    <script src="lib/jquery-1.12.0.min.js"></script>
 
-  <script src="lib/jquery-1.12.0.min.js"></script>
+    <!--jquery image files:
+    https://github.com/sehmaschine/django-grappelli/tree/grappelli_2_4/grappelli/static/grappelli/jquery/ui/css/custom-theme/images
+    -->
+    <link rel="stylesheet" href="lib/jquery-ui.css">
+    <script src="lib/jquery-1.10.2.js"></script>
+    <script src="lib/jquery-ui.js"></script>
 
-  <!--https://jqueryui.com/datepicker/#multiple-calendars-->
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-  <!--<link rel="stylesheet" href="/resources/demos/style.css">-->
+    <script src="lib/d3-3.5.15.min.js"></script>
+    <script src="lib/crossfilter-1.3.12.min.js"></script>
 
-  <script src="lib/d3-3.5.15.min.js"></script>
-  <script src="lib/crossfilter-1.3.12.min.js"></script>
+    <script src="lib/my_dc.beta26.js"></script>
+    <link rel="stylesheet" href="lib/dc.min.css" />
 
-  
-  <!--<script src="lib/my_dc.min.js"></script>-->
-  <!--<script src="lib/dc.beta26.js"></script>-->
-  <script src="lib/my_dc.beta26.js"></script>
-  <link rel="stylesheet" href="lib/dc.min.css" />
+    <script src="setup.js"></script>
 
-  <script src="setup.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
 
-  <script src="lib/bootstrap.min.js"></script>
-  <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <link href="sticky-footer-navbar.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet" type="text/css" media="all">
 
-  <link href="sticky-footer-navbar.css" rel="stylesheet">
+    <script src="lib/pace.js"></script>
+    <link href="lib/pace-theme-loading-bar.css" rel="stylesheet" />
 
-  <link href="style.css" rel="stylesheet" type="text/css" media="all">
-
-  <script src="lib/pace.js"></script>
-  <link href="lib/pace-theme-loading-bar.css" rel="stylesheet" />
-
-</head>
+  </head>
 
 <body onload='init();'>
 
@@ -71,6 +61,19 @@
     <!-- Begin page content -->
     <div class="container">
       <div class="row">
+        <div class="dc-chart col-md-12" id="div-config">
+          <div class="content">Calculated analogues file: <span class='value-outputfile'></span></div>
+          <div class="content">Number of analogues: <span class='value-nanalog'></span></div>
+          <div class="content">Var name: <span class='value-varname'></span></div>
+          <div class="content">Simulation source: <span class='value-simsource'></span></div>
+          <div class="content">Archive source: <span class='value-archivesource'></span></div>
+          <div class="content">bbox: <span class='value-bbox'></span></div>
+          <div class="content">Reference period: <span class='value-ref'></span></div>
+          <div>Full config file: <a href="config_ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.txt" target="_blank"><font color="#af885e">click here</font></a><br><br></div>
+        </div>
+      </div>
+
+      <div class="row">
         <div class="dc-chart col-md-8">
           <div class="dc-data-count" id="chart-count">
             <span class="filter-count"></span>analogues found out of <span class="total-count"></span> records
@@ -82,36 +85,37 @@
         <div id="message">SVP Patientez ~30 &ndash; 45 s. <br>
           Les données sont lourdes. <br>
           Si un pop-up s'affiche, <br>
-          cliquez sur Continue.
+          cliquez sur Continuer.
         </div>
-      </div> 
+      </div>
 
       <p></p>
 
       <div class="row">
-        <div class="dc-chart col-md-8">
-          <div class="dc-chart-title">Period of Interest (manual selection, format dd/mm/yyyy)</div>
+        <div class="dc-chart col-md-10">
+          <div class="dc-chart-title">Analysis period (manual selection, format dd/mm/yyyy)</div>
           <a id="dateReset" class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 
              style="display: none;">reset</a>
           <span class="reset" style="display: none;"></span>
           <br>
           <p>
-            Start Date: <input type="text" id="datepicker0">
-            End Date: <input type="text" id="datepicker1"></p>
-          <p>
+            Start Date (min: <span class='value-sdate'></span>) <input type="text" id="datepicker0">
+            End Date (max: <span class='value-edate'></span>) <input type="text" id="datepicker1">
+          </p>
         </div>
       </div>  
 
       <div class="row">
         <div class="dc-chart col-md-8" id="chart-poi">
-          <div class="dc-chart-title">Period of Interest (chart selection)</div>
+          <div class="dc-chart-title">Analysis period (chart selection)</div>
+          <div class="content"><span class='value-resolnLimit'></span></div>
           <a class="reset" href="javascript:poiChart.filterAll();dc.redrawAll();resetChart(poiChart);" 
              style="display: none;">reset</a>
           <span class="reset" style="display: none;"><span class="filter"></span></span>
           <br>
         </div>
 
-        <div class="dc-chart col-md-1" id="chart-seasons">
+        <div class="dc-chart col-md-3" id="chart-seasons">
           <div class="dc-chart-title">Season</div>
           <a class="reset" href="javascript:seasonsChart.filterAll();dc.redrawAll();" 
              style="display: none;">reset</a>
@@ -152,7 +156,7 @@
     <div class="container">
       <p class="text-muted credit">Created by <a target="_blank" href="http://www.lsce.ipsl.fr/en"><span title="Climate and Environment Sciences Laboratory" style="font-weight:bold;">LSCE</span></a>&nbsp;
         <a target="_blank" href="http://www.lsce.ipsl.fr/en"><img src="LSCE_Icon.png" title="Climate and Environment Sciences Laboratory" /></a> and hosted by <a target="_blank" href="http://www.ipsl.fr/en"><span title="Institut Pierre Simon Laplace" style="font-weight:bold;">IPSL</span></a>&nbsp;
-        <a target="_blank" href="http://www.ipsl.fr/en"><img src="IPSL_logo.png" title="Institut Pierre Simon Laplace" /></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.1 - 2016/02/15</p>
+        <a target="_blank" href="http://www.ipsl.fr/en"><img src="IPSL_logo.png" title="Institut Pierre Simon Laplace" /></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 0.9 - 2016/10/01</p>
     </div>
     <!-- /.container -->
   </div>

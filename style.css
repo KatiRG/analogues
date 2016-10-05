@@ -4,6 +4,13 @@
   padding: 0 0;
 }
 
+/*https://coolors.co/2c1320-5f4b66-a7adc6-8797af-56667a*/
+/*https://coolors.co/defffc-e2e4f6-e7c8dd-dbafc1-86626e*/
+#div-config {
+  font-weight: normal;
+  color: #8a817c;
+}
+
 .chart {
   display: inline-block;
   margin: 0 20px 20px;
@@ -30,11 +37,6 @@
     font-size: 10px;    
 }
 
-/*#chart-seasons {
-  transform: translate(-50px,-20px);
-  svg { width: 450px; }
-}*/
-
 .axis path, .axis line {
   fill: none;
   stroke: #333;
@@ -52,8 +54,8 @@
 }
 
 .dc-chart-title {
-  color: #333;
-  font-weight: normal;
+  color: #5b5b5b;
+  font-weight: bold;
   font-style: italic;
 }
 

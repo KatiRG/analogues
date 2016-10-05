@@ -1,0 +1,26 @@
+&FILES
+ my_files%archivefile = "base_slp_NA_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0.nc"
+ my_files%simulationfile = "sim_slp_NA_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0.nc"
+ my_files%outputfile ="ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.txt"
+ my_files%seacycfilebase = "seasoncyc_base.nc"
+ my_files%seacycfilesim = "seasoncyc_sim.nc"
+/
+&PARAM
+ my_params%timewin = 1
+ my_params%varname = "slp"
+ my_params%seacyc = .TRUE.
+ my_params%cycsmooth = 91
+ my_params%nanalog = 20
+ my_params%seasonwin = 30
+ my_params%distfun = "rms"
+ my_params%calccor = .TRUE.
+ my_params%oformat = ".txt"
+ my_params%silent = .FALSE.
+/
+&ATTS
+ my_atts%simsource = "NCEP"
+ my_atts%predictorvar = "slp"
+ my_atts%archisource = "NCEP"
+ my_atts%archiperiod = "1948-01-01,2016-09-23"
+ my_atts%predictordom = "-80.0,50.0,22.5,70.0"
+/
