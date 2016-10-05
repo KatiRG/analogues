@@ -545,17 +545,21 @@ function initCrossfilter() {
   })
 
   //-----------------------------------
+  var errorbarColour = '#b1b5c8';
   decadeChart
     .dimension(decadeDimension)
     .group(avgStddevGroup)
     .valueAccessor(function(kv) {
-      console.log(kv)
+      //console.log(kv)
       return kv.value.count;
     })
     .title(function (p) {
       return p.key +": "+ p.value.count +" analogues";
     })
     .on('renderlet', function(chart) {
+      //clear any previous errorbars
+      chart.selectAll('.errorbar').style("display", "none");
+
       var barHeight = chart.select('g.row rect').attr('height');
 
       //find y-coord of each bar and save to array
@@ -565,64 +569,62 @@ function initCrossfilter() {
         currenty.push(d3.transform(my_g.attr("transform")).translate[1]);
       }
 
-      //create errorbar nodes
-      var bar = chart.select("g").selectAll('g.errorbar')
-      .data(chart.data())
-      .enter()
-        .append('g')
+      var ebar = chart.selectAll('g.row')
+       .append('g')
         .attr('class', 'errorbar');
-      bar
+      ebar
         .append('line')
         .attr({
           'stroke-width': 1.5,
-          stroke: '#b1b5c8',
+          stroke: errorbarColour,
           x1: function(d) {
+            //console.log("d: ", d)
             return chart.x()(d.value.count - d.value.stddev);
           },
-          y1: function(d, idx) {
-            return currenty[idx] + barHeight/2;
+          y1: function(d) {
+            return barHeight/2;
           },
           x2: function(d) {
             return chart.x()(d.value.count + d.value.stddev);
           },
-          y2: function(d, idx) {
-            return currenty[idx] + barHeight/2;
+          y2: function(d) {
+            return  barHeight/2;
           }
         });
-      bar.append('line')
+      ebar.append('line')
         .attr({
           'stroke-width': 1,
-          stroke: '#b1b5c8',
+          stroke: errorbarColour,
           x1: function(d) {
             return chart.x()(d.value.count - d.value.stddev);
           },
-          y1: function(d, idx) {
-            return currenty[idx] + barHeight/2 - endwid;
+          y1: function(d) {
+            return barHeight/2 - endwid;
           },
           x2: function(d) {
             return chart.x()(d.value.count - d.value.stddev);
           },
-          y2: function(d, idx) {
-            return currenty[idx] + barHeight/2 + endwid;
+          y2: function(d) {
+            return barHeight/2 + endwid;
           }
         });
-      bar.append('line')
+      ebar.append('line')
         .attr({
           'stroke-width': 1,
-          stroke: '#b1b5c8',
+          stroke: errorbarColour,
           x1: function(d) {
             return chart.x()(d.value.count + d.value.stddev);
           },
-          y1: function(d, idx) {
-            return currenty[idx] + barHeight/2 - endwid;
+          y1: function(d) {
+            return barHeight/2 - endwid;
           },
           x2: function(d) {
             return chart.x()(d.value.count + d.value.stddev);
           },
-          y2: function(d, idx) {
-            return currenty[idx] + barHeight/2 + endwid;
+          y2: function(d) {
+            return barHeight/2 + endwid;
           }
-        });
+        });  
 
       })
     .colors(decadeColours)
