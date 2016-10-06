@@ -6,6 +6,7 @@ var poiDimension;
 var poiGrouping;
 var decadeDimension;
 var decadeGrouping;
+var avgStddevGroup;
 
 var minDate, maxDate, fullRange; //full range of POI dates. Used to clear filters
 var dataHour = "1200" //hour to set each dateRef to (default 00:00:00 GMT+0100)
@@ -14,6 +15,27 @@ var dataHour = "1200" //hour to set each dateRef to (default 00:00:00 GMT+0100)
 var dateFormat = d3.time.format('%Y%m%d%H%M');
 var datepickerDateFormat = d3.time.format('%d/%m/%Y'); //for display in calendar text boxes
 var day = 60 * 60 * 24 * 1000; //day in milliseconds
+
+//for errorbar calculation
+var decade1948_0 = new Date(1948,01,01), decade1948_1 = new Date(1955,12,31);
+var decade1956_0 = new Date(1956,01,01), decade1956_1 = new Date(1965,12,31);
+var decade1966_0 = new Date(1966,01,01), decade1966_1 = new Date(1975,12,31);
+var decade1976_0 = new Date(1976,01,01), decade1976_1 = new Date(1985,12,31);
+var decade1986_0 = new Date(1986,01,01), decade1986_1 = new Date(1995,12,31);
+var decade1996_0 = new Date(1996,01,01), decade1996_1 = new Date(2005,12,31);
+var decade2006_0 = new Date(2006,01,01), decade2006_1 = new Date(2015,12,31);
+
+var N_1948 = getN(decade1948_0, decade1948_1)
+var N_1956 = getN(decade1956_0, decade1956_1)
+var N_1966 = getN(decade1966_0, decade1966_1)
+var N_1976 = getN(decade1976_0, decade1976_1)
+var N_1986 = getN(decade1986_0, decade1986_1)
+var N_1996 = getN(decade1996_0, decade1996_1)
+var N_2006 = getN(decade2006_0, decade2006_1)
+
+function getN(date0, date1) {
+  return Math.round(Math.abs((date0.getTime() - date1.getTime())/(day)));
+}
 
 //http://www.colourlovers.com/palette/3860796/Melting_Glaciers
 var decadeColours = d3.scale.ordinal()
@@ -34,10 +56,7 @@ var init_date0, init_date1;
 //====================================================================
 function init() {
   //read config file
-  //d3.text("config_test.txt", function(text) {
-  //config_ana_slp_surface__rms_NA_sim_1948-01-01_2016-09-19_base_1948-01-01_2016-09-19_-80.0_50.0_22.5_70.0_1_30_20.txt
-  //d3.text("config_test_11anlgs.txt", function(text) {
-  d3.text("config_ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.txt", function(text) {    
+  d3.text("config_ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.txt", function(text) {
     text_array = d3.csv.parseRows(text);
 
     //Find element containing param string
@@ -79,22 +98,9 @@ function init() {
     $(".value-ref").html(startref + " &ndash; " + endref);
     
   });
+  
+  d3.tsv("ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.json", function(data) {
 
-  //http://localhost:8090/wpsoutputs/flyingpigeon/analogs-12f189be-79a7-11e6-b7f7-e7ff4fd8b248.txt
-  //config_ana_slp_surface__rms_NA_sim_1948-01-01_2016-09-19_base_1948-01-01_2016-09-19_-80.0_50.0_22.5_70.0_1_30_20.txt
-  //d3.tsv("test_11anlgs.json", function(data) {
-  //d3.tsv("ana_slp_surface_base_rms_NA_sim_1948-01-01_2016-09-23_base_1948-01-01_2016-09-23_-80.0_50.0_22.5_70.0_1_30_20.json", function(data) {  
-
-  //http://birdhouse-lsce.extra.cea.fr:8090/wpsoutputs/flyingpigeon/analogs-73cd782c-74f4-11e6-bf5f-f73f2a3d7e35.txt
-  //d3.tsv("test_gt1yr_birdhouse.json", function(data) {
-  //d3.tsv("test_gt1yr_birdhouse_03Jan2013.json", function(data) {
-
-  //d3.tsv("test2_edit.json", function(data) {
-  //d3.tsv("test_gt1yr.json", function(data) {
-  d3.tsv("modified-analogfileyODtII.tsv", function(data) {
-  //d3.tsv("test_span2months.json", function(data) {
-  //d3.tsv("test_span2months_edit.json", function(data) {
-    
     var firstDate = data[0].dateRef + dataHour; //set time from midnight to noon
     var lastDate = data[Object.keys(data).length - 1].dateRef + dataHour;
     minDate = dateFormat.parse(firstDate);
@@ -144,7 +150,7 @@ function init() {
       else if (yr >= 1976 && yr <= 1985) d.dateAnlg = "1976-1985";
       else if (yr >= 1986 && yr <= 1995) d.dateAnlg = "1986-1995";
       else if (yr >= 1996 && yr <= 2005) d.dateAnlg = "1996-2005";
-      else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";                    
+      else if (yr >= 2006 && yr <= 2015) d.dateAnlg = "2006-2015";
       else if (yr == 2016) d.dateAnlg = "2016";
 
       //bin correlation and distance
@@ -196,6 +202,49 @@ function initCrossfilter() {
     return d.dateAnlg;
   });
   decadeGrouping = decadeDimension.group();
+
+  //Errorbars for rowChart
+  //http://jsfiddle.net/gordonwoodhull/yrugrbhq/17/
+  //http://labs.physics.dur.ac.uk/skills/skills/poisson.php
+  factor_indep = Math.sqrt(5); //to handle that events are not independent
+  avgStddevGroup = decadeDimension.group().reduce(
+      function(p, v) {
+        ++p.count;
+        
+        if(p.count>1)
+          p.var = p.count
+        p.erN_1948 = factor_indep * 2 * Math.sqrt( (p.var/N_1948) * (N_1948 - p.var) );
+        p.erN_1956 = factor_indep * 2 * Math.sqrt( (p.var/N_1956) * (N_1956 - p.var) );
+        p.erN_1966 = factor_indep * 2 * Math.sqrt( (p.var/N_1966) * (N_1966 - p.var) );
+        p.erN_1976 = factor_indep * 2 * Math.sqrt( (p.var/N_1976) * (N_1976 - p.var) );
+        p.erN_1986 = factor_indep * 2 * Math.sqrt( (p.var/N_1986) * (N_1986 - p.var) );
+        p.erN_1996 = factor_indep * 2 * Math.sqrt( (p.var/N_1996) * (N_1996 - p.var) );
+        p.erN_2006 = factor_indep * 2 * Math.sqrt( (p.var/N_2006) * (N_2006 - p.var) );
+        
+        return p;
+
+      }, function(p, v) {
+        --p.count;
+        
+        if(p.count>1)
+          p.var = p.count
+        p.erN_1948 = factor_indep * 2 * Math.sqrt( (p.var/N_1948) * (N_1948 - p.var) );
+        p.erN_1956 = factor_indep * 2 * Math.sqrt( (p.var/N_1956) * (N_1956 - p.var) );
+        p.erN_1966 = factor_indep * 2 * Math.sqrt( (p.var/N_1966) * (N_1966 - p.var) );
+        p.erN_1976 = factor_indep * 2 * Math.sqrt( (p.var/N_1976) * (N_1976 - p.var) );
+        p.erN_1986 = factor_indep * 2 * Math.sqrt( (p.var/N_1986) * (N_1986 - p.var) );
+        p.erN_1996 = factor_indep * 2 * Math.sqrt( (p.var/N_1996) * (N_1996 - p.var) );
+        p.erN_2006 = factor_indep * 2 * Math.sqrt( (p.var/N_2006) * (N_2006 - p.var) );
+
+        return p;
+      }, function() {
+        return {count: 0, var: 0, 
+          erN_1948: 0, erN_1956:0, erN_1966: 0, 
+          erN_1976: 0, erN_1986: 0, erN_1996: 0,
+          erN_2006: 0
+        }
+      });
+  var endwid = 3;
 
   //-----------------------------------  
   corrDimension = filter.dimension(function(d) {
@@ -286,9 +335,6 @@ function initCrossfilter() {
      
     }
 
-    //Offset by 2h on either side of brush
-    // d0.setHours(10);
-    // d1.setHours(14);
 
     //global vars read by getBrushDates()
     calendarFlag = 1;
@@ -350,7 +396,7 @@ function initCrossfilter() {
       left: 40
     })
     .mouseZoomable(true)  
-    .dimension(poiDimension)                
+    .dimension(poiDimension)
     .group(dateGroup)                
     .transitionDuration(500)
     .filter(dc.filters.RangedFilter(minDate, init_date1))
@@ -454,14 +500,14 @@ function initCrossfilter() {
           else if (poiChart.filter()[0].getHours() < 12) {
             start_day = poiChart.filter()[0];
           }          
-          console.log("start_day: ", start_day) 
+          //console.log("start_day: ", start_day) 
  
           if (poiChart.filter()[1].getHours() < 12) {
             end_day = shiftDay("subtractDay");
           } else if (poiChart.filter()[1].getHours() >= 12) {
             end_day = poiChart.filter()[1];
           }
-          console.log("end_day: ", end_day) 
+          //console.log("end_day: ", end_day) 
 
           //Update date display in calendar text boxes
           changeTextboxDates(start_day, end_day);
@@ -520,15 +566,111 @@ function initCrossfilter() {
   })
 
   //-----------------------------------
+  var errorbarColour = '#b1b5c8';
   decadeChart
-    .width(380)
+    .width(430)
     .height(200)
-    //.margins({top: 10, right: 10, bottom: 30, left: 10})
+    .margins({top: 10, right: 20, bottom: 30, left: 40})
     .dimension(decadeDimension)
-    .group(decadeGrouping)
+    .group(avgStddevGroup)
+    .valueAccessor(function(kv) {
+      // console.log(kv)
+      return kv.value.count;
+    })
     .title(function (p) {
-      return p.key +": "+ p.value +" analogues";
-    })    
+      return p.key +": "+ p.value.count +" analogues";
+    })
+    .on('renderlet', function(chart) {
+      //clear any previous errorbars
+      chart.selectAll('.errorbar').remove()
+
+      var barHeight = chart.select('g.row rect').attr('height');
+
+      var ebar = chart.selectAll('g.row')
+       .append('g')
+        .attr('class', function(d) {
+          return 'decade' + d.key + ' errorbar';
+        });
+      ebar
+        .append('line')
+        .attr('class', 'erline_horizontal')
+        .attr({
+          'stroke-width': 1.5,
+          stroke: errorbarColour,
+          x1: function(d) {
+            //Display errorbar corresponding to specific decade
+            var decade = this.parentNode.__data__.key;            
+
+            if (decade === "1948-1955") er_decade = d.value.erN_1948;
+            else if (decade === "1956-1965") er_decade = d.value.erN_1956;
+            else if (decade === "1966-1975") er_decade = d.value.erN_1966;
+            else if (decade === "1976-1985") er_decade = d.value.erN_1976;
+            else if (decade === "1986-1995") er_decade = d.value.erN_1986;
+            else if (decade === "1996-2005") er_decade = d.value.erN_1996;
+            else if (decade === "2006-2015") er_decade = d.value.erN_2006;
+                        
+            return chart.x()(d.value.count - er_decade);
+          },
+          y1: function(d) {
+            return barHeight/2;
+          },
+          x2: function(d) {
+            //Display errorbar corresponding to specific decade
+            var decade = this.parentNode.__data__.key;
+            if (decade === "1948-1955") er_decade = d.value.erN_1948;
+            else if (decade === "1956-1965") er_decade = d.value.erN_1956;
+            else if (decade === "1966-1975") er_decade = d.value.erN_1966;
+            else if (decade === "1976-1985") er_decade = d.value.erN_1976;
+            else if (decade === "1986-1995") er_decade = d.value.erN_1986;
+            else if (decade === "1996-2005") er_decade = d.value.erN_1996;
+            else if (decade === "2006-2015") er_decade = d.value.erN_2006;
+            
+            return chart.x()(d.value.count + er_decade);
+          },
+          y2: function(d) {
+            return  barHeight/2;
+          }
+        });
+      ebar.append('line')
+        .attr({
+          'stroke-width': 1,
+          stroke: errorbarColour,
+          x1: function(d) {
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x1");
+          },
+          y1: function(d) {
+            return barHeight/2 - endwid;
+          },
+          x2: function(d) {
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x1");
+          },
+          y2: function(d) {
+            return barHeight/2 + endwid;
+          }
+        });
+      ebar.append('line')
+        .attr({
+          'stroke-width': 1,
+          stroke: errorbarColour,
+          x1: function(d) {
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x2");
+          },
+          y1: function(d) {
+            return barHeight/2 - endwid;
+          },
+          x2: function(d) {
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x2");
+          },
+          y2: function(d) {
+            return barHeight/2 + endwid;
+          }
+        });  
+
+      })
     .colors(decadeColours)
     .elasticX(true)
     .gap(2)
