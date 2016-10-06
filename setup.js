@@ -229,7 +229,6 @@ function initCrossfilter() {
         
         if(p.count>1)
           p.var = p.count
-        p.stddev = Math.sqrt(p.var);
         p.erN_1948 = factor_indep * 2 * Math.sqrt( (p.var/N_1948) * (N_1948 - p.var) );
         p.erN_1956 = factor_indep * 2 * Math.sqrt( (p.var/N_1956) * (N_1956 - p.var) );
         p.erN_1966 = factor_indep * 2 * Math.sqrt( (p.var/N_1966) * (N_1966 - p.var) );
@@ -245,7 +244,6 @@ function initCrossfilter() {
         
         if(p.count>1)
           p.var = p.count
-        p.stddev = Math.sqrt(p.var);
         p.erN_1948 = factor_indep * 2 * Math.sqrt( (p.var/N_1948) * (N_1948 - p.var) );
         p.erN_1956 = factor_indep * 2 * Math.sqrt( (p.var/N_1956) * (N_1956 - p.var) );
         p.erN_1966 = factor_indep * 2 * Math.sqrt( (p.var/N_1966) * (N_1966 - p.var) );
@@ -617,7 +615,7 @@ function initCrossfilter() {
           stroke: errorbarColour,
           x1: function(d) {
             //Display errorbar corresponding to specific decade
-            var decade = this.parentNode.__data__.key;
+            var decade = this.parentNode.__data__.key;            
 
             if (decade === "1948-1955") er_decade = d.value.erN_1948;
             else if (decade === "1956-1965") er_decade = d.value.erN_1956;
@@ -655,17 +653,14 @@ function initCrossfilter() {
           stroke: errorbarColour,
           x1: function(d) {
             var decade = this.parentNode.__data__.key;
-
-            // junk = chart.select('.' + decade + ' .erline_horizontal').attr("x1")
-            // junk = decadeChart.select('.' + decade )
-            // console.log("junk: ", junk)
-            return chart.x()(d.value.count - d.value.stddev);
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x1");
           },
           y1: function(d) {
             return barHeight/2 - endwid;
           },
           x2: function(d) {
-            return chart.x()(d.value.count - d.value.stddev);
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x1");
           },
           y2: function(d) {
             return barHeight/2 + endwid;
@@ -676,13 +671,15 @@ function initCrossfilter() {
           'stroke-width': 1,
           stroke: errorbarColour,
           x1: function(d) {
-            return chart.x()(d.value.count + d.value.stddev);
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x2");
           },
           y1: function(d) {
             return barHeight/2 - endwid;
           },
           x2: function(d) {
-            return chart.x()(d.value.count + d.value.stddev);
+            var decade = this.parentNode.__data__.key;
+            return chart.select('.decade' + decade + ' .erline_horizontal').attr("x2");
           },
           y2: function(d) {
             return barHeight/2 + endwid;
