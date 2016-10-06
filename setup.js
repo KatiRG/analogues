@@ -228,18 +228,32 @@ function initCrossfilter() {
         ++p.count;
         
         if(p.count>1)
-          p.var = p.count;
+          p.var = p.count
         p.stddev = Math.sqrt(p.var);
-        p.erN_1948 = Math.sqrt(p.count/N_1948);
+        p.erN_1948 = factor_indep * 2 * Math.sqrt( (p.var/N_1948) * (N_1948 - p.var) );
+        p.erN_1956 = factor_indep * 2 * Math.sqrt( (p.var/N_1956) * (N_1956 - p.var) );
+        p.erN_1966 = factor_indep * 2 * Math.sqrt( (p.var/N_1966) * (N_1966 - p.var) );
+        p.erN_1976 = factor_indep * 2 * Math.sqrt( (p.var/N_1976) * (N_1976 - p.var) );
+        p.erN_1986 = factor_indep * 2 * Math.sqrt( (p.var/N_1986) * (N_1986 - p.var) );
+        p.erN_1996 = factor_indep * 2 * Math.sqrt( (p.var/N_1996) * (N_1996 - p.var) );
+        p.erN_2006 = factor_indep * 2 * Math.sqrt( (p.var/N_2006) * (N_2006 - p.var) );
+        
         return p;
+
       }, function(p, v) {
-        // exercise for the reader
         --p.count;
         
         if(p.count>1)
-          p.var = p.count;
+          p.var = p.count
         p.stddev = Math.sqrt(p.var);
-        p.erN_1948 = Math.sqrt(p.count/N_1948);
+        p.erN_1948 = factor_indep * 2 * Math.sqrt( (p.var/N_1948) * (N_1948 - p.var) );
+        p.erN_1956 = factor_indep * 2 * Math.sqrt( (p.var/N_1956) * (N_1956 - p.var) );
+        p.erN_1966 = factor_indep * 2 * Math.sqrt( (p.var/N_1966) * (N_1966 - p.var) );
+        p.erN_1976 = factor_indep * 2 * Math.sqrt( (p.var/N_1976) * (N_1976 - p.var) );
+        p.erN_1986 = factor_indep * 2 * Math.sqrt( (p.var/N_1986) * (N_1986 - p.var) );
+        p.erN_1996 = factor_indep * 2 * Math.sqrt( (p.var/N_1996) * (N_1996 - p.var) );
+        p.erN_2006 = factor_indep * 2 * Math.sqrt( (p.var/N_2006) * (N_2006 - p.var) );
+
         return p;
       }, function() {
         return {count: 0, var: 0, 
@@ -578,7 +592,7 @@ function initCrossfilter() {
     .dimension(decadeDimension)
     .group(avgStddevGroup)
     .valueAccessor(function(kv) {
-      console.log(kv)
+      // console.log(kv)
       return kv.value.count;
     })
     .title(function (p) {
@@ -586,41 +600,50 @@ function initCrossfilter() {
     })
     .on('renderlet', function(chart) {
       //clear any previous errorbars
-      chart.selectAll('.errorbar').style("display", "none");
+      chart.selectAll('.errorbar').remove()
 
       var barHeight = chart.select('g.row rect').attr('height');
 
       var ebar = chart.selectAll('g.row')
        .append('g')
         .attr('class', function(d) {
-          return 'decade' +d.key + ' errorbar';
+          return 'decade' + d.key + ' errorbar';
         });
       ebar
         .append('line')
+        .attr('class', 'erline_horizontal')
         .attr({
           'stroke-width': 1.5,
           stroke: errorbarColour,
           x1: function(d) {
-            //console.log("d: ", d)
-            console.log("this parentNode: ", d3.select(this.parentNode)[0][0])
-            console.log("this.parentNode: ", this.parentNode.__data__.key)
+            //Display errorbar corresponding to specific decade
             var decade = this.parentNode.__data__.key;
-            if (decade = "1948-1955") er_decade = d.value.erN_1948;
-            else if (decade = "1956-1965") er_decade = d.value.erN_1956;
-            else if (decade = "1966-1975") er_decade = d.value.erN_1966;
-            else if (decade = "1976-1985") er_decade = d.value.erN_1976;
-            else if (decade = "1986-1995") er_decade = d.value.erN_1986;
-            else if (decade = "1996-2005") er_decade = d.value.erN_1996;
-            else if (decade = "2006-2015") er_decade = d.value.erN_2006;
-            
-            //return chart.x()(d.value.count - d.value.stddev);
+
+            if (decade === "1948-1955") er_decade = d.value.erN_1948;
+            else if (decade === "1956-1965") er_decade = d.value.erN_1956;
+            else if (decade === "1966-1975") er_decade = d.value.erN_1966;
+            else if (decade === "1976-1985") er_decade = d.value.erN_1976;
+            else if (decade === "1986-1995") er_decade = d.value.erN_1986;
+            else if (decade === "1996-2005") er_decade = d.value.erN_1996;
+            else if (decade === "2006-2015") er_decade = d.value.erN_2006;
+                        
             return chart.x()(d.value.count - er_decade);
           },
           y1: function(d) {
             return barHeight/2;
           },
           x2: function(d) {
-            return chart.x()(d.value.count + d.value.stddev);
+            //Display errorbar corresponding to specific decade
+            var decade = this.parentNode.__data__.key;
+            if (decade === "1948-1955") er_decade = d.value.erN_1948;
+            else if (decade === "1956-1965") er_decade = d.value.erN_1956;
+            else if (decade === "1966-1975") er_decade = d.value.erN_1966;
+            else if (decade === "1976-1985") er_decade = d.value.erN_1976;
+            else if (decade === "1986-1995") er_decade = d.value.erN_1986;
+            else if (decade === "1996-2005") er_decade = d.value.erN_1996;
+            else if (decade === "2006-2015") er_decade = d.value.erN_2006;
+            
+            return chart.x()(d.value.count + er_decade);
           },
           y2: function(d) {
             return  barHeight/2;
@@ -631,6 +654,11 @@ function initCrossfilter() {
           'stroke-width': 1,
           stroke: errorbarColour,
           x1: function(d) {
+            var decade = this.parentNode.__data__.key;
+
+            // junk = chart.select('.' + decade + ' .erline_horizontal').attr("x1")
+            // junk = decadeChart.select('.' + decade )
+            // console.log("junk: ", junk)
             return chart.x()(d.value.count - d.value.stddev);
           },
           y1: function(d) {
